@@ -1,4 +1,2 @@
-.*env
-app
-backend_app
-websocket_app
+cmd/backend/backend
+cmd/websocket/websocket
