@@ -1,0 +1,13 @@
+package user_app
+
+import (
+	"github.com/vanshjangir/rapidgo/server/internal/ports"
+)
+
+type userService struct {
+	ur ports.UserRepository
+}
+
+func NewUserService(ur ports.UserRepository) ports.UserService {
+	return &userService{ur: ur}
+}

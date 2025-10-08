@@ -9,19 +9,24 @@ type GameService interface {
 
 type UserService interface {
 	ChangeUsername(oldName, newName string) error
-	LoginByEmail(email, password string) error
 	LoginByGoogle(credentials string) (string, error)
 	LoginAsGuest(credentials string) (string, string, error)
 	Signup(username, email, password string) error
 	AuthGoogle(token string) (string, error)
 	AuthGuest(token string) (string, error)
-	Match(domain.WaitingPlayer) (string, error)
 }
 
 type WsGameService interface {
+	AddWsGameRepo(WsGameRepository)
 	Send(data []byte) error
 	Receive() ([]byte, error)
 	Close() error
 	Auth(us UserService) (string, error)
-	Play(username string)
+	Play(game *domain.Game)
+	SetupGame(username string) (*domain.Game, error)
+	SendStartConfirmation() error
+}
+
+type MatchMakingService interface {
+	Match(domain.WaitingPlayer) (string, error)
 }

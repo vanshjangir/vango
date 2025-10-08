@@ -7,6 +7,7 @@ import (
 type GameRepository interface {
 	SaveGame(g *domain.Game) error
 	Review(gameid string) (domain.GameReview, error)
+	CreateNewGame(blackName, whiteName string) error
 }
 
 type UserRepository interface {
@@ -20,4 +21,8 @@ type WsGameRepository interface {
 	Send(data []byte) error
 	Receive() ([]byte, error)
 	Close() error
+}
+
+type PubSubRepository interface {
+	GetGameFromUsername(username string) (*domain.GameDataForPlayer, error)
 }

@@ -3,17 +3,19 @@ package main
 import (
 	"fmt"
 
-	"github.com/vanshjangir/rapidgo/server/internal/adapters/postgresAdp"
-	"github.com/vanshjangir/rapidgo/server/internal/adapters/webAdp"
-	"github.com/vanshjangir/rapidgo/server/internal/applications"
+	"github.com/vanshjangir/rapidgo/server/internal/adapters/postgres_adp"
+	"github.com/vanshjangir/rapidgo/server/internal/adapters/web_adp"
+	"github.com/vanshjangir/rapidgo/server/internal/applications/mm_app"
+	"github.com/vanshjangir/rapidgo/server/internal/applications/user_app"
 )
 
 func main() {
-	db := postgresAdp.SetupDB()
-	userRepo := postgresAdp.NewPostgresUserRepo(db)
-    userService := applications.NewUserService(userRepo)
+	db := postgres_adp.SetupDB()
+	userRepo := postgres_adp.NewPostgresUserRepo(db)
+    userService := user_app.NewUserService(userRepo)
+	matchMakingService := mm_app.NewMatchMakingService(userRepo, nil)
 
-	httpHandler := webAdp.NewGinHandler(userService, nil)
+	httpHandler := web_adp.NewGinHandler(userService, nil, matchMakingService)
 	httpHandler.RegisterRoutes()
 	httpHandler.Run()
 

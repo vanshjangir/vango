@@ -23,3 +23,9 @@ type WaitingPlayer struct {
 	AddedAt  time.Time
 }
 
+type GameDataForPlayer struct {
+	GameId	string `json:"gameid"`
+	BlackName string `json:"blackname"`
+	Whitename string `json:"whitename"`
+	StartTime	int64 `json:"starttime"`
+}

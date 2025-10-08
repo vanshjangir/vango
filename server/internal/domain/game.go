@@ -18,10 +18,11 @@ type Game struct {
 	Size      int
 	MaxTime   int
 	Board     *baduk.Board
-	BlackName string
-	WhiteName string
-	BlackTime int
-	WhiteTime int
+	Color	  int
+	PName     string
+	OpName 	  string
+	LocalRecv chan any
+	PassedTime int
 	Turn      int
 	History   []string
 }
@@ -34,25 +35,22 @@ type GameReview struct {
 	History   []string
 }
 
-func (g *Game) Init(id, blackName, whiteName string, size, maxTime int) {
+func (g *Game) Init(id, playerName, opponentName string, size, maxTime int) {
 	g.Id = id
-	g.BlackName = blackName
-	g.WhiteName = whiteName
-	g.Turn = WhiteTag
-	g.BlackTime = 0
-	g.WhiteTime = 0
+	g.PName = playerName
+	g.OpName = opponentName
+	g.Turn = BlackTag
+	g.PassedTime = 0
 	g.Size = size
 	g.MaxTime = maxTime
+
+	g.LocalRecv = make(chan any)
 
 	g.Board = new(baduk.Board)
 	g.Board.Init(g.Size)
 }
 
-func (g *Game) MakeMove(move string, color int) (string, error) {
-	if g.Turn == color {
-		return "", fmt.Errorf("Not your turn")
-	}
-
+func (g *Game) MakeMove(move string) (string, error) {
 	nextturn := -1
 	col := int(move[0] - 'a')
 	row, err := strconv.Atoi(move[1:])
@@ -60,7 +58,7 @@ func (g *Game) MakeMove(move string, color int) (string, error) {
 		return "", fmt.Errorf("Invalid move format")
 	}
 
-	if color == BlackTag {
+	if g.Color == BlackTag {
 		err = g.Board.SetB(col, row)
 		nextturn = WhiteTag
 	} else {
@@ -73,7 +71,20 @@ func (g *Game) MakeMove(move string, color int) (string, error) {
 
 	g.Turn = nextturn
 	g.History = append(g.History, move)
-	return g.Board.Encode()
+	encode, err := g.Board.Encode()
+	return encode, err
+}
+
+func (g *Game) CheckTimeout() bool {
+    if g.Turn != g.Color {
+        return false;
+    }
+
+    if g.PassedTime >= g.MaxTime {
+        return true
+    }
+
+    return false
 }
 
 func (g *Game) WinnerIfOver() int {
