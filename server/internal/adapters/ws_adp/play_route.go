@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/vanshjangir/rapidgo/server/internal/applications/ws_app"
 )
 
 var upgrader = websocket.Upgrader{
@@ -23,7 +22,7 @@ func (wsh *WsHandler) play(ctx *gin.Context) {
 	}
 
 	wsGameRepo := NewWebsocketGameRepo(c)
-    wsGameService := ws_app.NewWsGameService(wsGameRepo, nil)
+    wsGameService := wsh.ws.CopyWsGameService(wsGameRepo)
 
 	username, err := wsGameService.Auth(wsh.us)
 	if err != nil {

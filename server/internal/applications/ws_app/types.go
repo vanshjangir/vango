@@ -15,6 +15,10 @@ type MsgType struct {
     Type    string  `json:"type"`
 }
 
+type MsgStart struct {
+	Type string	`json:"type"`
+}
+
 type MsgMove struct {
     Type    string  `json:"type"`
     Move    string  `json:"move"`

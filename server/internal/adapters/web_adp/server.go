@@ -33,7 +33,7 @@ func (gh *GinHandler) RegisterRoutes() {
 	gh.r.POST("/login", gh.login)
 	gh.r.POST("/signup", gh.signup)
 
-	gh.r.GET("/findgame", gh.httpAuth, gh.findGame)
+	gh.r.GET("/findgame", gh.findGame)
 	gh.r.POST("/changeusername", gh.httpAuth, gh.changeUsername)
 }
 

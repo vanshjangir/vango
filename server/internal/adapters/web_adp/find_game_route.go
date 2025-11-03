@@ -1,6 +1,8 @@
 package web_adp
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/vanshjangir/rapidgo/server/internal/domain"
 )
@@ -8,6 +10,7 @@ import (
 func (gh *GinHandler) findGame(ctx *gin.Context) {
 	var wp domain.WaitingPlayer
 	if err := ctx.ShouldBindJSON(&wp); err != nil {
+		log.Println("Error in binding json:", err)
 		ctx.JSON(400, gin.H{"error": "invalid payload"})
 		return
 	}

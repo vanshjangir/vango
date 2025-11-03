@@ -1,23 +1,39 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
+	"github.com/joho/godotenv"
 	"github.com/vanshjangir/rapidgo/server/internal/adapters/postgres_adp"
+	"github.com/vanshjangir/rapidgo/server/internal/adapters/pubsub_adp"
 	"github.com/vanshjangir/rapidgo/server/internal/adapters/web_adp"
+	"github.com/vanshjangir/rapidgo/server/internal/applications/game_app"
 	"github.com/vanshjangir/rapidgo/server/internal/applications/mm_app"
 	"github.com/vanshjangir/rapidgo/server/internal/applications/user_app"
 )
 
 func main() {
-	db := postgres_adp.SetupDB()
-	userRepo := postgres_adp.NewPostgresUserRepo(db)
-    userService := user_app.NewUserService(userRepo)
-	matchMakingService := mm_app.NewMatchMakingService(userRepo, nil)
+	if err := godotenv.Load(".env"); err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-	httpHandler := web_adp.NewGinHandler(userService, nil, matchMakingService)
+	if err := mm_app.Load("./gameservers.json"); err != nil {
+		log.Fatal("Error loading game servers", err)
+	}
+	
+	db := postgres_adp.SetupDB()
+	
+	userRepo := postgres_adp.NewPostgresUserRepo(db)
+	gameRepo := postgres_adp.NewPostgresGameRepo(db)
+    pubsubRepo := pubsub_adp.NewPubsubRepo()
+    
+	userService := user_app.NewUserService(userRepo)
+    gameService := game_app.NewGameService(gameRepo)
+	matchMakingService := mm_app.NewMatchMakingService(userRepo, gameRepo, pubsubRepo)
+
+	httpHandler := web_adp.NewGinHandler(userService, gameService, matchMakingService)
 	httpHandler.RegisterRoutes()
 	httpHandler.Run()
 
-	fmt.Println("Starting server")
+	log.Println("Starting server")
 }

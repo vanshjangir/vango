@@ -2,12 +2,11 @@ package postgres_adp
 
 import (
 	"time"
-
-	"gorm.io/gorm"
+	
+	"github.com/vanshjangir/rapidgo/server/internal/domain"
 )
 
 type UserModel struct {
-	gorm.Model
 	Username      string `gorm:"primaryKey"`
 	Password      string
 	Email         string
@@ -16,13 +15,19 @@ type UserModel struct {
 }
 
 type GameModel struct {
-	gorm.Model
-	Gameid    string `gorm:"primaryKey"`
+	Gameid    int 	`gorm:"primaryKey;autoIncrement"`
 	White     string
 	Black     string
 	Winner    string
 	Wonby     string
-	Moves     []string
-	Date      time.Time
-	CreatedAt time.Time
+	Moves     domain.StringArray
+	CreatedAt time.Time	`gorm:"autoCreateTime"`
+}
+
+func (UserModel) TableName() string {
+	return "users"
+}
+
+func (GameModel) TableName() string {
+	return "games"
 }

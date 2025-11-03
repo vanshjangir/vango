@@ -4,7 +4,7 @@ import "github.com/vanshjangir/rapidgo/server/internal/domain"
 
 type GameService interface {
 	SaveGame(g *domain.Game) error
-	Review(gameid string) (domain.GameReview, error)
+	Review(gameid int) (domain.GameReview, error)
 }
 
 type UserService interface {
@@ -17,7 +17,6 @@ type UserService interface {
 }
 
 type WsGameService interface {
-	AddWsGameRepo(WsGameRepository)
 	Send(data []byte) error
 	Receive() ([]byte, error)
 	Close() error
@@ -25,6 +24,7 @@ type WsGameService interface {
 	Play(game *domain.Game)
 	SetupGame(username string) (*domain.Game, error)
 	SendStartConfirmation() error
+    CopyWsGameService(wr WsGameRepository) WsGameService
 }
 
 type MatchMakingService interface {

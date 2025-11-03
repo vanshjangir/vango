@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	matched = make(map[string]*[2]domain.WaitingPlayer)
 	waiting = make(map[string]domain.WaitingPlayer)
 	mu      sync.Mutex
 	ttl     = 60 * time.Second
@@ -38,6 +39,11 @@ func matchPlayer(p domain.WaitingPlayer) *[2]domain.WaitingPlayer {
 	mu.Lock()
 	defer mu.Unlock()
 
+	if val, ok := matched[p.Id]; ok {
+		delete(matched, p.Id)
+		return val;
+	}
+
 	now := time.Now()
 	for id, w := range waiting {
 		if now.Sub(w.AddedAt) > ttl {
@@ -50,10 +56,25 @@ func matchPlayer(p domain.WaitingPlayer) *[2]domain.WaitingPlayer {
 			continue
 		}
 		if abs(p.Rating-other.Rating) <= 100 {
+			twoWaitingPlayers :=  &[2]domain.WaitingPlayer{p, other}
+			matched[p.Id] = twoWaitingPlayers
+			matched[id] = twoWaitingPlayers
 			delete(waiting, p.Id)
 			delete(waiting, id)
-			return &[2]domain.WaitingPlayer{p, other}
+			return twoWaitingPlayers
 		}
+	}
+	return nil
+}
+
+func (s *matchMakingService) CreateNewGame(blackName, whiteName string) error {
+	id, err := s.gr.CreateNewGame(blackName, whiteName)
+	if err != nil {
+		return fmt.Errorf("CreateNewGame: %v", err)
+	}
+	err = s.pr.SetGameWithUsername(id, blackName, whiteName)
+	if err != nil {
+		return fmt.Errorf("CreateNewGame: %v", err)
 	}
 	return nil
 }
@@ -68,10 +89,13 @@ func (s *matchMakingService) Match(wp domain.WaitingPlayer) (string, error) {
 		select {
 		case <-timeout:
 			removePlayer(wp.Id)
-			return "", fmt.Errorf("timeout")
+			return "", fmt.Errorf("Match: timeout")
 		case <-tick:
 			if mp := matchPlayer(wp); mp != nil {
-                s.gr.CreateNewGame(mp[0].Username, mp[1].Username)
+				err := s.CreateNewGame(mp[0].Username, mp[1].Username)
+				if err != nil {
+					return "", fmt.Errorf("Match: %v", err)
+				}
                 wsurl := Pick();
                 return wsurl, nil
 			}

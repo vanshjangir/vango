@@ -7,8 +7,8 @@ import (
 )
 
 type GameServer struct {
-    url      string
-    load     int
+	Url      string	`json:"url"`
+	Load     int	`json:"load"`
 }
 
 var gameServers []GameServer
@@ -37,23 +37,23 @@ func Pick() string {
     minLoad := int(^uint(0) >> 1)
 
     for i := range gameServers {
-        if gameServers[i].load < minLoad {
+        if gameServers[i].Load < minLoad {
             selected = &gameServers[i]
-            minLoad = gameServers[i].load
+            minLoad = gameServers[i].Load
         }
     }
     if selected != nil {
-        selected.load++
+        selected.Load++
     }
-    return selected.url
+    return selected.Url
 }
 
 func Release(url string) {
     gsMu.Lock()
     defer gsMu.Unlock()
     for i := range gameServers {
-        if gameServers[i].url == url {
-            gameServers[i].load -= 1
+        if gameServers[i].Url == url {
+            gameServers[i].Load -= 1
             break
         }
     }

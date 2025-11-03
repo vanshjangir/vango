@@ -13,19 +13,19 @@ type User struct {
 type Player struct {
 	User   User
 	Color  int
-	GameId *string
+	GameId *int
 }
 
 type WaitingPlayer struct {
-	Id       string
-	Username string
-	Rating   int
-	AddedAt  time.Time
+	Id       string 	`json:"id"`
+	Username string		`json:"username"`
+	Rating   int		`json:"rating"`
+	AddedAt  time.Time	`json:"addedat"`
 }
 
 type GameDataForPlayer struct {
-	GameId	string `json:"gameid"`
+	GameId	int `json:"gameid"`
 	BlackName string `json:"blackname"`
 	Whitename string `json:"whitename"`
-	StartTime	int64 `json:"starttime"`
+	StartTime	time.Time `json:"starttime"`
 }
