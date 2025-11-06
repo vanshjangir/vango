@@ -17,6 +17,7 @@ type MsgType struct {
 
 type MsgStart struct {
 	Type string	`json:"type"`
+	GameId int `json:"gameid"`
 }
 
 type MsgMove struct {

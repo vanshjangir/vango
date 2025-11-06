@@ -45,11 +45,13 @@ func (s *wsGameService) SetupGame(username string) (*domain.Game, error) {
 	game := new(domain.Game)
 	game.Init(gameData.GameId, pname, opname, 19, 5*60*1000)
 
+	s.gameMap[username] = game
+
 	return game, err
 }
 
-func (s *wsGameService) SendStartConfirmation() error {
-	return s.SendJSON(MsgStart{Type: "start"})
+func (s *wsGameService) SendStartConfirmation(gameId int) error {
+	return s.SendJSON(MsgStart{Type: "start", GameId: gameId})
 }
 
 func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
@@ -227,6 +229,9 @@ func (s *wsGameService) ReceiveFromClient(
 			log.Println(err)
 		}
 		if cancel {
+			if err := s.Close(); err != nil {
+				log.Println("Error in closing websocket connection:", err)
+			}
 			closeChan <- CLIENT_OUT
 			return
 		}
@@ -264,6 +269,8 @@ func (s *wsGameService) Play(game *domain.Game) {
 	go s.checkTimer(game, closeChan)
 	
 	out := <- closeChan
+	log.Println("Closing game...")
+	
 	switch (out) {
 	case TIMER_OUT, LOCAL_OUT:
 		*isOver = true
@@ -273,6 +280,7 @@ func (s *wsGameService) Play(game *domain.Game) {
 		}
 	}
 	close(closeChan)
-	
+
+	delete(s.gameMap, game.PName)
 	s.SaveGame(game);
 }

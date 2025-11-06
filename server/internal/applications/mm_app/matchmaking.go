@@ -18,7 +18,7 @@ var (
 func addPlayer(p domain.WaitingPlayer) {
 	mu.Lock()
 	p.AddedAt = time.Now()
-	waiting[p.Id] = p
+	waiting[p.Username] = p
 	mu.Unlock()
 }
 
@@ -39,8 +39,8 @@ func matchPlayer(p domain.WaitingPlayer) *[2]domain.WaitingPlayer {
 	mu.Lock()
 	defer mu.Unlock()
 
-	if val, ok := matched[p.Id]; ok {
-		delete(matched, p.Id)
+	if val, ok := matched[p.Username]; ok {
+		delete(matched, p.Username)
 		return val;
 	}
 
@@ -51,16 +51,16 @@ func matchPlayer(p domain.WaitingPlayer) *[2]domain.WaitingPlayer {
 		}
 	}
 
-	for id, other := range waiting {
-		if other.Id == p.Id {
+	for username, other := range waiting {
+		if other.Username == p.Username {
 			continue
 		}
 		if abs(p.Rating-other.Rating) <= 100 {
 			twoWaitingPlayers :=  &[2]domain.WaitingPlayer{p, other}
-			matched[p.Id] = twoWaitingPlayers
-			matched[id] = twoWaitingPlayers
-			delete(waiting, p.Id)
-			delete(waiting, id)
+			matched[p.Username] = twoWaitingPlayers
+			matched[username] = twoWaitingPlayers
+			delete(waiting, p.Username)
+			delete(waiting, username)
 			return twoWaitingPlayers
 		}
 	}
@@ -88,7 +88,7 @@ func (s *matchMakingService) Match(wp domain.WaitingPlayer) (string, error) {
 	for {
 		select {
 		case <-timeout:
-			removePlayer(wp.Id)
+			removePlayer(wp.Username)
 			return "", fmt.Errorf("Match: timeout")
 		case <-tick:
 			if mp := matchPlayer(wp); mp != nil {

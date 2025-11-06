@@ -27,7 +27,7 @@ func (r *PostgresGameRepo) SaveGame(g *domain.Game) error {
 		}).Error
 	if err != nil {
 		tx.Rollback()
-		return err
+		return fmt.Errorf("SaveGame: %v", err)
 	}
 	
 	tx.Commit()

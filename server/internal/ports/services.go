@@ -23,7 +23,7 @@ type WsGameService interface {
 	Auth(us UserService) (string, error)
 	Play(game *domain.Game)
 	SetupGame(username string) (*domain.Game, error)
-	SendStartConfirmation() error
+	SendStartConfirmation(gameId int) error
     CopyWsGameService(wr WsGameRepository) WsGameService
 }
 

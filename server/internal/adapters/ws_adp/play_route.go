@@ -1,6 +1,7 @@
 package ws_adp
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,21 +25,24 @@ func (wsh *WsHandler) play(ctx *gin.Context) {
 	wsGameRepo := NewWebsocketGameRepo(c)
     wsGameService := wsh.ws.CopyWsGameService(wsGameRepo)
 
-	username, err := wsGameService.Auth(wsh.us)
-	if err != nil {
-		wsGameService.Send([]byte("Authentication unsuccessfull"))
-		wsGameService.Close()
-		return
-	}
+	//username, err := wsGameService.Auth(wsh.us)
+	//if err != nil {
+	//	wsGameService.Send([]byte("Authentication unsuccessfull"))
+	//	wsGameService.Close()
+	//	return
+	//}
+	username := ctx.Query("username")
 
 	game, err := wsGameService.SetupGame(username)
 	if err != nil {
+		log.Println("Error setting up game:", err)
 		wsGameService.Send([]byte("Server Error occurred"))
 		return
 	}
 
-	err = wsGameService.SendStartConfirmation();
+	err = wsGameService.SendStartConfirmation(game.Id);
 	if err != nil {
+		log.Println("Error sending start confirmation:", err)
 		wsGameService.Close()
 		return
 	}

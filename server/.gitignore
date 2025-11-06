@@ -1,2 +1,4 @@
 cmd/backend/backend
+cmd/backend/.env
 cmd/websocket/websocket
+cmd/websocket/.env

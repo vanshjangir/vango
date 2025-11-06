@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
+	"github.com/joho/godotenv"
 	"github.com/vanshjangir/rapidgo/server/internal/adapters/postgres_adp"
 	"github.com/vanshjangir/rapidgo/server/internal/adapters/pubsub_adp"
 	"github.com/vanshjangir/rapidgo/server/internal/adapters/ws_adp"
@@ -12,6 +13,10 @@ import (
 )
 
 func main() {
+	if err := godotenv.Load(".env"); err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	
 	db := postgres_adp.SetupDB()
 	
     userRepo := postgres_adp.NewPostgresUserRepo(db)
@@ -27,5 +32,5 @@ func main() {
 	wsHandler.RegisterRoutes()
 	wsHandler.Run()
 
-	fmt.Println("Starting server")
+	log.Println("Starting server")
 }

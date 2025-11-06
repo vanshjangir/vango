@@ -17,7 +17,6 @@ type Player struct {
 }
 
 type WaitingPlayer struct {
-	Id       string 	`json:"id"`
 	Username string		`json:"username"`
 	Rating   int		`json:"rating"`
 	AddedAt  time.Time	`json:"addedat"`
