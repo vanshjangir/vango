@@ -1,11 +1,5 @@
 package ws_app
 
-const (
-	TIMER_OUT = 1
-	CLIENT_OUT = 2
-	LOCAL_OUT = 3
-)
-
 type ClientRecvResult struct {
 	data []byte
 	err error
@@ -18,6 +12,7 @@ type MsgType struct {
 type MsgStart struct {
 	Type string	`json:"type"`
 	GameId int `json:"gameid"`
+	Color	int `json:color`
 }
 
 type MsgMove struct {

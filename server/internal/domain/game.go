@@ -15,6 +15,12 @@ const (
 	Handicap = 7.5
 )
 
+const (
+	TIMER_OUT = 1
+	CLIENT_OUT = 2
+	LOCAL_OUT = 3
+	INTERNAL_ERROR = 4
+)
 
 type StringArray []string
 
@@ -44,14 +50,22 @@ type Game struct {
     WonBy      string
 	Turn      int
 	History   StringArray
+
+	CloseChan chan GameCloseStatus
+	IsOver    bool
 }
 
 type GameReview struct {
 	Id        int
 	BlackName string
 	WhiteName string
-	Winner    string
+	Winner    int
 	Moves   StringArray
+}
+
+type GameCloseStatus struct {
+	Code	int
+	ShouldSendToOp bool
 }
 
 func (g *Game) Init(id int, playerName, opponentName string, size, maxTime int) {
@@ -70,7 +84,6 @@ func (g *Game) Init(id int, playerName, opponentName string, size, maxTime int) 
 }
 
 func (g *Game) MakeMove(move string) (string, error) {
-	nextturn := -1
 	col := int(move[0] - 'a')
 	row, err := strconv.Atoi(move[1:])
 	if err != nil {
@@ -79,16 +92,14 @@ func (g *Game) MakeMove(move string) (string, error) {
 
 	if g.Color == BlackColor {
 		err = g.Board.SetB(col, row)
-		nextturn = WhiteColor
 	} else {
 		err = g.Board.SetW(col, row)
-		nextturn = BlackColor
 	}
 	if err != nil {
 		return "", err
 	}
 
-	g.Turn = nextturn
+	g.Turn = 1 - g.Turn
 	g.History = append(g.History, move)
 	encode, err := g.Board.Encode()
 	return encode, err

@@ -18,7 +18,7 @@ type GameModel struct {
 	Gameid    int 	`gorm:"primaryKey;autoIncrement"`
 	White     string
 	Black     string
-	Winner    string
+	Winner    int
 	Wonby     string
 	Moves     domain.StringArray
 	CreatedAt time.Time	`gorm:"autoCreateTime"`

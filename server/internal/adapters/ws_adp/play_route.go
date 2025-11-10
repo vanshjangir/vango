@@ -40,7 +40,7 @@ func (wsh *WsHandler) play(ctx *gin.Context) {
 		return
 	}
 
-	err = wsGameService.SendStartConfirmation(game.Id);
+	err = wsGameService.SendStartConfirmation(game);
 	if err != nil {
 		log.Println("Error sending start confirmation:", err)
 		wsGameService.Close()

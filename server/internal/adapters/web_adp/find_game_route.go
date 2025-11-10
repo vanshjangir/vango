@@ -16,6 +16,7 @@ func (gh *GinHandler) findGame(ctx *gin.Context) {
 	}
 
     if wsurl, err := gh.ms.Match(wp); err != nil {
+		log.Println("Error in Match:", err)
         ctx.JSON(500, gin.H{"error": "Matching failed"})
     } else {
         ctx.JSON(200, gin.H{"wsurl": wsurl})

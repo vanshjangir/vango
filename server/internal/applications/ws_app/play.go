@@ -16,7 +16,7 @@ func (s *wsGameService) Send(data []byte) error {
 func (s *wsGameService) SendJSON(obj any) error {
 	data, err := json.Marshal(obj)
 	if err != nil {
-		return err
+		return fmt.Errorf("SendJSON: %v", err)
 	}
 	return s.wr.Send(data)
 }
@@ -44,14 +44,19 @@ func (s *wsGameService) SetupGame(username string) (*domain.Game, error) {
 
 	game := new(domain.Game)
 	game.Init(gameData.GameId, pname, opname, 19, 5*60*1000)
+	if username == gameData.BlackName {
+		game.Color = domain.BlackColor
+	} else {
+		game.Color = domain.WhiteColor
+	}
 
 	s.gameMap[username] = game
 
 	return game, err
 }
 
-func (s *wsGameService) SendStartConfirmation(gameId int) error {
-	return s.SendJSON(MsgStart{Type: "start", GameId: gameId})
+func (s *wsGameService) SendStartConfirmation(game *domain.Game) error {
+	return s.SendJSON(MsgStart{Type: "start", GameId: game.Id, Color: game.Color})
 }
 
 func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
@@ -61,6 +66,8 @@ func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
 	msgMoveStatus.Type = "movestatus"
 	msgMoveStatus.Move = msgMove.Move
 	msgMoveStatus.PassedTime = game.PassedTime
+	msgMoveStatus.InvalidTurn = false
+	msgMoveStatus.InvalidMove = false
 	
 	err := json.Unmarshal(data, &msgMove)
 	if err != nil {
@@ -77,6 +84,7 @@ func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
 		if err := s.Send(data); err != nil {
 			return fmt.Errorf("handleMove: Send invalid turn: %v", err)
 		}
+		return nil;
 	}
 
 	boardState, err := game.MakeMove(msgMove.Move)
@@ -90,6 +98,7 @@ func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
 		if err := s.Send(data); err != nil {
 			return fmt.Errorf("handleMove: Send invalid move: %v", err)
 		}
+		return nil
 	}
 
 	msgMove.State = boardState
@@ -108,6 +117,23 @@ func (s *wsGameService) sendToOpLocally(game *domain.Game, msg any) {
 	if ok {
 		opGame.LocalRecv <- msg
 	}
+}
+
+func (s *wsGameService) handleGameOverWhenError(by string, winner int) error {
+	var msgGameOver MsgGameOver
+	msgGameOver.Type = "gameover"
+	msgGameOver.By = by
+	msgGameOver.Winner = winner
+
+	if err := s.SendJSON(msgGameOver); err != nil {
+		return fmt.Errorf("handleGameOverWhenError: %v", err)
+	}
+		
+	if err := s.Close(); err != nil {
+		log.Println("handleGameOverWhenError: closing websocket:", err)
+	}
+	
+	return nil
 }
 
 func (s *wsGameService) handleGameOver(game *domain.Game, by string, winner int) error {
@@ -135,9 +161,17 @@ func (s *wsGameService) handleAbort(game *domain.Game) error {
 	return nil
 }
 
-func (s *wsGameService) handleLocalMsg(msg any) bool {
-	switch msg.(type) {
-	case MsgMove, MsgChat:
+func (s *wsGameService) handleLocalMsg(game *domain.Game, msg any) bool {
+	switch msg := msg.(type) {
+	case MsgMove:
+		// no need to check for validity, as this is sent locally,
+		// which means it is already being validated
+		game.MakeMove(msg.Move)
+		if err := s.SendJSON(msg); err != nil {
+			log.Println("handleLocalMsg: SendJSON for MsgMove, MsgChat:", err)
+			return true
+		}
+	case MsgChat:
 		if err := s.SendJSON(msg); err != nil {
 			log.Println("handleLocalMsg: SendJSON for MsgMove, MsgChat:", err)
 			return true
@@ -152,17 +186,17 @@ func (s *wsGameService) handleLocalMsg(msg any) bool {
 	return false
 }
 
-func (s *wsGameService) ReceiveLocally(
-	game *domain.Game,
-	closeChan chan int,
-){
+func (s *wsGameService) ReceiveLocally(game *domain.Game){
 	for {
 		select {
-		case <- closeChan:
+		case <- game.CloseChan:
 			return
 		case msg := <- game.LocalRecv:
-			if s.handleLocalMsg(msg) == true {
-				closeChan <- LOCAL_OUT;
+			if s.handleLocalMsg(game, msg) == true {
+				game.CloseChan <- domain.GameCloseStatus{
+					Code: domain.LOCAL_OUT,
+					ShouldSendToOp: false,
+				}
 				return
 			}
 		}
@@ -209,44 +243,51 @@ func (s *wsGameService) handleClientData(game *domain.Game, data []byte) (bool, 
 	return shouldCancel, err
 }
 
-func (s *wsGameService) ReceiveFromClient(
-	game *domain.Game,
-	closeChan chan int,
-	isOver *bool,
-){
+func (s *wsGameService) ReceiveFromClient(game *domain.Game){
 	for {
 		data, err := s.Receive()
 		if err != nil {
-			if !(*isOver) {
+			if !game.IsOver {
 				log.Println("Error receiving data", err)
-				closeChan <- CLIENT_OUT
+				game.CloseChan <- domain.GameCloseStatus{
+					Code: domain.CLIENT_OUT,
+					ShouldSendToOp: true,
+				}
 			}
 			return
 		}
 
 		cancel, err := s.handleClientData(game, data)
+		shouldSendToOp := false
 		if err != nil {
+			shouldSendToOp = true
 			log.Println(err)
 		}
 		if cancel {
 			if err := s.Close(); err != nil {
 				log.Println("Error in closing websocket connection:", err)
 			}
-			closeChan <- CLIENT_OUT
+			game.CloseChan <- domain.GameCloseStatus{
+				Code: domain.CLIENT_OUT,
+				ShouldSendToOp: shouldSendToOp,
+			}
 			return
 		}
 
 	}
 }
 
-func (s *wsGameService) checkTimer(game *domain.Game, closeChan chan int) {
+func (s *wsGameService) checkTimer(game *domain.Game) {
 	for {
 		select {
-		case <-closeChan:
+		case <-game.CloseChan:
 			return
 		default:
 			if game.CheckTimeout() {
-				closeChan <- TIMER_OUT
+				game.CloseChan <- domain.GameCloseStatus{
+					Code: domain.TIMER_OUT,
+					ShouldSendToOp: false,
+				}
 				return
 			}
 			time.Sleep(1*time.Second)
@@ -261,26 +302,40 @@ func (s *wsGameService) SaveGame(game *domain.Game) {
 }
 
 func (s *wsGameService) Play(game *domain.Game) {
-	closeChan := make(chan int)
-	isOver := new(bool)
-	*isOver = false
-	go s.ReceiveFromClient(game, closeChan, isOver)
-	go s.ReceiveLocally(game, closeChan)
-	go s.checkTimer(game, closeChan)
+	game.CloseChan = make(chan domain.GameCloseStatus)
+	game.IsOver = false
 	
-	out := <- closeChan
+	go s.ReceiveFromClient(game)
+	go s.ReceiveLocally(game)
+	go s.checkTimer(game)
+	
+	out := <- game.CloseChan
+	game.IsOver = true
 	log.Println("Closing game...")
 	
-	switch (out) {
-	case TIMER_OUT, LOCAL_OUT:
-		*isOver = true
-		err := s.Close()
-		if err != nil {
-			log.Println("Error closing websocket connection", err)
+	switch (out.Code) {
+	case domain.CLIENT_OUT:
+	case domain.INTERNAL_ERROR:
+		if err := s.handleGameOverWhenError("disconnection", game.Color);
+		err != nil {
+			log.Println("domain.INTERNAL_ERROR: ", err)
+		}
+	
+	default:
+		if err := s.Close(); err != nil {
+			log.Println("Error closing websocket connection:", err)
 		}
 	}
-	close(closeChan)
+	
+	if out.ShouldSendToOp {
+		s.gameMap[game.OpName].IsOver = true
+		s.gameMap[game.OpName].CloseChan <- domain.GameCloseStatus{
+			Code: domain.INTERNAL_ERROR,
+			ShouldSendToOp: false,
+		}
+	}
 
+	close(game.CloseChan)
 	delete(s.gameMap, game.PName)
-	s.SaveGame(game);
+	s.SaveGame(game)
 }
