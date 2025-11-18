@@ -12,7 +12,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/vanshjangir/rapidgo/server/internal/domain"
 )
-    
+
 type PubsubRepo struct {
 	rdb *redis.Client
 	ctx context.Context
@@ -50,7 +50,7 @@ func NewPubsubRepo() *PubsubRepo {
 }
 
 func (r *PubsubRepo) GetGameFromUsername(
-    username string,
+	username string,
 ) (*domain.GameDataForPlayer, error) {
 	hashKey := "live_game"
 	rawJsonString, err := r.rdb.HGet(r.ctx, hashKey, username).Result()
@@ -63,7 +63,7 @@ func (r *PubsubRepo) GetGameFromUsername(
 	if err != nil {
 		return nil, fmt.Errorf("GetGameFromUsername: %v", err)
 	}
-	
+
 	return &gameData, nil
 }
 
@@ -72,7 +72,7 @@ func (r *PubsubRepo) SetGameWithUsername(
 ) error {
 	hashKey := "live_game"
 	jsonData, err := json.Marshal(domain.GameDataForPlayer{
-		GameId: gameId,
+		GameId:    gameId,
 		BlackName: blackName,
 		Whitename: whiteName,
 		StartTime: time.Now(),

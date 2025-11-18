@@ -18,7 +18,7 @@ func NewGinHandler(
 	gs ports.GameService,
 	ms ports.MatchMakingService,
 ) *GinHandler {
-    r := gin.Default()
+	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"*"},

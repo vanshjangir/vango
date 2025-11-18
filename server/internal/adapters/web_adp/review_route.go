@@ -13,7 +13,7 @@ func (gh *GinHandler) review(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "Wrong Game Id"})
 		return
 	}
-	
+
 	review, err := gh.gs.Review(gameid)
 	if err != nil {
 		ctx.Status(400)

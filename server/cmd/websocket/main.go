@@ -16,17 +16,16 @@ func main() {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	
+
 	db := postgres_adp.SetupDB()
-	
-    userRepo := postgres_adp.NewPostgresUserRepo(db)
-    gameRepo := postgres_adp.NewPostgresGameRepo(db)
-    wsGameRepo := ws_adp.NewWebsocketGameRepo(nil)
-    pubsubRepo := pubsub_adp.NewPubsubRepo()
-    
+
+	userRepo := postgres_adp.NewPostgresUserRepo(db)
+	gameRepo := postgres_adp.NewPostgresGameRepo(db)
+	pubsubRepo := pubsub_adp.NewPubsubRepo()
+
 	userService := user_app.NewUserService(userRepo)
-    gameService := game_app.NewGameService(gameRepo)
-    wsGameService := ws_app.NewWsGameService(wsGameRepo, pubsubRepo, gameRepo, userRepo)
+	gameService := game_app.NewGameService(gameRepo)
+	wsGameService := ws_app.NewWsGameService(pubsubRepo, gameRepo, userRepo)
 
 	wsHandler := ws_adp.NewWsHandler(userService, gameService, wsGameService)
 	wsHandler.RegisterRoutes()

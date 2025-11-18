@@ -8,12 +8,12 @@ import (
 )
 
 type wsAuthRequest struct {
-	Type	string	`json:"type"`
-	Token	string	`json:"token"`
+	Type  string `json:"type"`
+	Token string `json:"token"`
 }
 
-func (s *wsGameService) Auth(us ports.UserService) (string, error) {
-	data, err := s.wr.Receive()
+func (s *wsGameService) Auth(repo ports.WsGameRepository, us ports.UserService) (string, error) {
+	data, err := repo.Receive()
 	if err != nil {
 		return "", err
 	}

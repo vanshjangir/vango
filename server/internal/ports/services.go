@@ -17,14 +17,15 @@ type UserService interface {
 }
 
 type WsGameService interface {
-	Send(data []byte) error
-	Receive() ([]byte, error)
-	Close() error
-	Auth(us UserService) (string, error)
+	Send(game *domain.Game, data []byte) error
+	SendJSON(game *domain.Game, obj any) error
+	Receive(game *domain.Game) ([]byte, error)
+	Close(game *domain.Game) error
+	Auth(repo WsGameRepository, us UserService) (string, error)
 	Play(game *domain.Game)
-	SetupGame(username string) (*domain.Game, error)
+	SetupGame(username string, repo WsGameRepository) (*domain.Game, error)
+	LoadExistingGame(username string, repo WsGameRepository) (*domain.Game, error)
 	SendStartConfirmation(game *domain.Game) error
-    CopyWsGameService(wr WsGameRepository) WsGameService
 }
 
 type MatchMakingService interface {

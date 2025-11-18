@@ -9,7 +9,6 @@ import (
 	"github.com/vanshjangir/rapidgo/server/internal/domain"
 )
 
-
 func (s *userService) LoginByGoogle(credentials string) (string, error) {
 	tokenInfo, err := util_app.VerifyGoogleToken(credentials)
 	if err != nil {

@@ -16,9 +16,9 @@ type WsHandler struct {
 func NewWsHandler(
 	us ports.UserService,
 	gs ports.GameService,
-    ws ports.WsGameService,
+	ws ports.WsGameService,
 ) *WsHandler {
-    r := gin.Default()
+	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"*"},
@@ -29,6 +29,7 @@ func NewWsHandler(
 
 func (wsh *WsHandler) RegisterRoutes() {
 	wsh.r.GET("/play", wsh.play)
+	wsh.r.GET("/reconnect", wsh.reconnect)
 }
 
 func (wsh *WsHandler) Run() {

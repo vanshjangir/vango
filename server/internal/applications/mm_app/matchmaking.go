@@ -41,7 +41,7 @@ func (s *matchMakingService) matchPlayer(p domain.WaitingPlayer) (bool, error) {
 
 	if ok := matched[p.Username]; ok {
 		delete(matched, p.Username)
-		return true, nil;
+		return true, nil
 	}
 
 	now := time.Now()
@@ -56,17 +56,17 @@ func (s *matchMakingService) matchPlayer(p domain.WaitingPlayer) (bool, error) {
 			continue
 		}
 		if abs(p.Rating-other.Rating) <= 100 {
-			twoWaitingPlayers :=  &[2]domain.WaitingPlayer{p, other}
+			twoWaitingPlayers := &[2]domain.WaitingPlayer{p, other}
 			matched[p.Username] = true
 			matched[username] = true
-			
+
 			if err := s.CreateNewGame(
 				twoWaitingPlayers[0].Username,
 				twoWaitingPlayers[1].Username,
 			); err != nil {
 				return false, fmt.Errorf("Match: %v", err)
 			}
-			
+
 			delete(waiting, p.Username)
 			delete(waiting, username)
 			return true, nil
@@ -99,10 +99,10 @@ func (s *matchMakingService) Match(wp domain.WaitingPlayer) (string, error) {
 			removePlayer(wp.Username)
 			return "", fmt.Errorf("Match: timeout")
 		case <-tick:
-			matched, err := s.matchPlayer(wp);
+			matched, err := s.matchPlayer(wp)
 			if matched {
-                wsurl := Pick();
-                return wsurl, nil
+				wsurl := Pick()
+				return wsurl, nil
 			}
 			if err != nil {
 				return "", fmt.Errorf("Match: %v", err)

@@ -2,7 +2,7 @@ package postgres_adp
 
 import (
 	"time"
-	
+
 	"github.com/vanshjangir/rapidgo/server/internal/domain"
 )
 
@@ -15,13 +15,13 @@ type UserModel struct {
 }
 
 type GameModel struct {
-	Gameid    int 	`gorm:"primaryKey;autoIncrement"`
+	Gameid    int `gorm:"primaryKey;autoIncrement"`
 	White     string
 	Black     string
 	Winner    int
 	Wonby     string
 	Moves     domain.StringArray
-	CreatedAt time.Time	`gorm:"autoCreateTime"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
 }
 
 func (UserModel) TableName() string {

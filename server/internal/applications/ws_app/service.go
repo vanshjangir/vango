@@ -4,33 +4,23 @@ import (
 	"github.com/vanshjangir/rapidgo/server/internal/domain"
 	"github.com/vanshjangir/rapidgo/server/internal/ports"
 )
-	
 
 type wsGameService struct {
-	wr ports.WsGameRepository
-	pr ports.PubSubRepository
-    gr ports.GameRepository
-    ur ports.UserRepository
+	pr      ports.PubSubRepository
+	gr      ports.GameRepository
+	ur      ports.UserRepository
 	gameMap map[string]*domain.Game
+	repoMap map[string]ports.WsGameRepository
 }
 
 func NewWsGameService(
-	wr ports.WsGameRepository,
 	pr ports.PubSubRepository,
-    gr ports.GameRepository,
-    ur ports.UserRepository,
+	gr ports.GameRepository,
+	ur ports.UserRepository,
 ) ports.WsGameService {
 	return &wsGameService{
-		wr: wr, pr: pr, gr: gr, ur: ur,
+		pr: pr, gr: gr, ur: ur,
 		gameMap: make(map[string]*domain.Game),
-	}
-}
-
-func (s* wsGameService) CopyWsGameService(
-	wr ports.WsGameRepository,
-) ports.WsGameService {
-	return &wsGameService{
-		wr: wr,
-		pr: s.pr, gr: s.gr, ur: s.ur, gameMap: s.gameMap,
+		repoMap: make(map[string]ports.WsGameRepository),
 	}
 }

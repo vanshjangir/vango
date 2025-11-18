@@ -20,15 +20,15 @@ func main() {
 	if err := mm_app.Load("./gameservers.json"); err != nil {
 		log.Fatal("Error loading game servers", err)
 	}
-	
+
 	db := postgres_adp.SetupDB()
-	
+
 	userRepo := postgres_adp.NewPostgresUserRepo(db)
 	gameRepo := postgres_adp.NewPostgresGameRepo(db)
-    pubsubRepo := pubsub_adp.NewPubsubRepo()
-    
+	pubsubRepo := pubsub_adp.NewPubsubRepo()
+
 	userService := user_app.NewUserService(userRepo)
-    gameService := game_app.NewGameService(gameRepo)
+	gameService := game_app.NewGameService(gameRepo)
 	matchMakingService := mm_app.NewMatchMakingService(userRepo, gameRepo, pubsubRepo)
 
 	httpHandler := web_adp.NewGinHandler(userService, gameService, matchMakingService)

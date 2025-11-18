@@ -17,19 +17,19 @@ func NewPostgresGameRepo(db *gorm.DB) *PostgresGameRepo {
 
 func (r *PostgresGameRepo) SaveGame(g *domain.Game) error {
 	tx := r.db.Begin()
-	
+
 	err := tx.Model(&GameModel{}).
 		Where("gameid = ?", g.Id).
 		Updates(map[string]any{
 			"winner": g.Winner,
-			"wonby": g.WonBy,
-			"moves": g.History,
+			"wonby":  g.WonBy,
+			"moves":  g.State.History,
 		}).Error
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("SaveGame: %v", err)
 	}
-	
+
 	tx.Commit()
 	return nil
 }
@@ -39,7 +39,7 @@ func (r *PostgresGameRepo) Review(gameId int) (domain.GameReview, error) {
 	if err := r.db.Take(&review, "gameid = ?", gameId).Error; err != nil {
 		return domain.GameReview{}, err
 	}
-	
+
 	return domain.GameReview{
 		Id:        review.Gameid,
 		BlackName: review.Black,
@@ -52,13 +52,13 @@ func (r *PostgresGameRepo) Review(gameId int) (domain.GameReview, error) {
 func (r *PostgresGameRepo) CreateNewGame(
 	blackName, whiteName string,
 ) (int, error) {
-    tx := r.db.Begin()
+	tx := r.db.Begin()
 	game := GameModel{White: whiteName, Black: blackName}
-    result := tx.Create(&game)
-    if result.Error != nil {
-        tx.Rollback()
+	result := tx.Create(&game)
+	if result.Error != nil {
+		tx.Rollback()
 		return -1, fmt.Errorf("CreateNewGame: %v", result.Error)
-    }
-    tx.Commit()
-    return  game.Gameid, nil
+	}
+	tx.Commit()
+	return game.Gameid, nil
 }

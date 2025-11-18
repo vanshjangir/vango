@@ -2,25 +2,20 @@ package ws_adp
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-func (wsh *WsHandler) play(ctx *gin.Context) {
+func (wsh *WsHandler) reconnect(ctx *gin.Context) {
 	w, r := ctx.Writer, ctx.Request
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Could not able to upgrade connection"})
 		return
 	}
+
+	wsGameRepo := NewWebsocketGameRepo(c)
 
 	//username, err := wsGameService.Auth(wsh.us)
 	//if err != nil {
@@ -29,22 +24,14 @@ func (wsh *WsHandler) play(ctx *gin.Context) {
 	//	return
 	//}
 	username := ctx.Query("username")
-
-	wsGameRepo := NewWebsocketGameRepo(c)
-	game, err := wsh.ws.SetupGame(username, wsGameRepo)
+	game, err := wsh.ws.LoadExistingGame(username, wsGameRepo)
 	if err != nil {
-		log.Println("Error setting up game:", err)
+		log.Println("Error reconnecting to game for user", username, err)
 		c.WriteMessage(websocket.TextMessage, []byte("Server Error occurred"))
 		c.Close()
 		return
 	}
-
-	err = wsh.ws.SendStartConfirmation(game)
-	if err != nil {
-		log.Println("Error sending start confirmation:", err)
-		wsh.ws.Close(game)
-		return
-	}
-
-	go wsh.ws.Play(game)
+	game.IsOnline = true
+	*game.ReconnectChan <- true
+	log.Printf("Player %v reconnected\n", username)
 }

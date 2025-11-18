@@ -19,12 +19,12 @@ func (r *PostgresUserRepo) FindByUsername(username string) (domain.User, error) 
 		return domain.User{}, err
 	}
 	return domain.User{
-        Username: user.Username,
-        Email: user.Email,
-        Password: user.Password,
-        Rating: user.Rating,
-        Highestrating: user.Highestrating,
-    }, nil
+		Username:      user.Username,
+		Email:         user.Email,
+		Password:      user.Password,
+		Rating:        user.Rating,
+		Highestrating: user.Highestrating,
+	}, nil
 }
 
 func (r *PostgresUserRepo) FindByEmail(email string) (domain.User, error) {
@@ -33,29 +33,29 @@ func (r *PostgresUserRepo) FindByEmail(email string) (domain.User, error) {
 		return domain.User{}, err
 	}
 	return domain.User{
-        Username: user.Username,
-        Email: user.Email,
-        Password: user.Password,
-        Rating: user.Rating,
-        Highestrating: user.Highestrating,
-    }, nil
+		Username:      user.Username,
+		Email:         user.Email,
+		Password:      user.Password,
+		Rating:        user.Rating,
+		Highestrating: user.Highestrating,
+	}, nil
 }
 
 func (r *PostgresUserRepo) InsertUser(user domain.User) error {
-    tx := r.db.Begin()
-    err := tx.Create(&UserModel{
-        Username: user.Username,
-        Email: user.Email,
-        Password: user.Password,
-        Rating: user.Rating,
-        Highestrating: user.Highestrating,
-    }).Error
-    if err != nil {
-        tx.Rollback()
-        return err
-    }
-    tx.Commit()
-    return nil
+	tx := r.db.Begin()
+	err := tx.Create(&UserModel{
+		Username:      user.Username,
+		Email:         user.Email,
+		Password:      user.Password,
+		Rating:        user.Rating,
+		Highestrating: user.Highestrating,
+	}).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
 }
 
 func (r *PostgresUserRepo) ChangeUsername(oldName, newName string) error {
