@@ -11,12 +11,14 @@ type WsHandler struct {
 	us ports.UserService
 	gs ports.GameService
 	ws ports.WsGameService
+    ss ports.SpectateService
 }
 
 func NewWsHandler(
 	us ports.UserService,
 	gs ports.GameService,
 	ws ports.WsGameService,
+    ss ports.SpectateService,
 ) *WsHandler {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
@@ -24,12 +26,13 @@ func NewWsHandler(
 		AllowMethods: []string{"*"},
 		AllowHeaders: []string{"*"},
 	}))
-	return &WsHandler{r: r, us: us, gs: gs, ws: ws}
+	return &WsHandler{r: r, us: us, gs: gs, ws: ws, ss: ss}
 }
 
 func (wsh *WsHandler) RegisterRoutes() {
 	wsh.r.GET("/play", wsh.play)
 	wsh.r.GET("/reconnect", wsh.reconnect)
+	wsh.r.GET("/spectate/:gameid", wsh.spectate)
 }
 
 func (wsh *WsHandler) Run() {

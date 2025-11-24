@@ -9,7 +9,8 @@ type wsGameService struct {
 	pr      ports.PubSubRepository
 	gr      ports.GameRepository
 	ur      ports.UserRepository
-	gameMap map[string]*domain.Game
+	gameMap map[int]*domain.Game
+	playerGameMap map[string]*domain.Game
 	repoMap map[string]ports.WsGameRepository
 }
 
@@ -20,7 +21,8 @@ func NewWsGameService(
 ) ports.WsGameService {
 	return &wsGameService{
 		pr: pr, gr: gr, ur: ur,
-		gameMap: make(map[string]*domain.Game),
+		gameMap: make(map[int]*domain.Game),
+		playerGameMap: make(map[string]*domain.Game),
 		repoMap: make(map[string]ports.WsGameRepository),
 	}
 }

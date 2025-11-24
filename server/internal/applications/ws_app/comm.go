@@ -28,11 +28,11 @@ func (s *wsGameService) Close(game *domain.Game) error {
 }
 
 func (s *wsGameService) SendStartConfirmation(game *domain.Game) error {
-	return s.SendJSON(game, MsgStart{Type: "start", GameId: game.Id, Color: game.Color})
+	return s.SendJSON(game, domain.MsgStart{Type: "start", GameId: game.Id, Color: game.Color})
 }
 
-func (s *wsGameService) sendToOpLocally(game *domain.Game, msg any) {
-	opGame, ok := s.gameMap[game.OpName]
+func (s *wsGameService) SendToOpLocally(game *domain.Game, msg any) {
+	opGame, ok := s.playerGameMap[game.OpName]
 	if ok {
 		opGame.LocalRecv <- msg
 	}

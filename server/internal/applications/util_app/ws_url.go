@@ -1,4 +1,4 @@
-package mm_app
+package util_app
 
 import (
 	"encoding/json"

@@ -26,8 +26,16 @@ type WsGameService interface {
 	SetupGame(username string, repo WsGameRepository) (*domain.Game, error)
 	LoadExistingGame(username string, repo WsGameRepository) (*domain.Game, error)
 	SendStartConfirmation(game *domain.Game) error
+	GetGameFromId(gameId int) *domain.Game
+	GetGameFromPlayerName(name string) *domain.Game
 }
 
 type MatchMakingService interface {
 	Match(domain.WaitingPlayer) (string, error)
+}
+
+type SpectateService interface {
+	Start()
+	AddSpectator(game *domain.Game, repo WsGameRepository)
+	SendSyncState(blackGame, whiteGame *domain.Game, repo WsGameRepository)
 }

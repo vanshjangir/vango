@@ -26,4 +26,8 @@ type WsGameRepository interface {
 type PubSubRepository interface {
 	GetGameFromUsername(username string) (*domain.GameDataForPlayer, error)
 	SetGameWithUsername(gameId int, blackName, whiteName string) error
+	Send(game *domain.Game, msg any) error
+	Subscribe(name string) error
+	Unsubscribe(name string) error
+	Receive(msgChan chan string)
 }

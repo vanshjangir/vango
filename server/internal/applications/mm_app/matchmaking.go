@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/vanshjangir/rapidgo/server/internal/applications/util_app"
 	"github.com/vanshjangir/rapidgo/server/internal/domain"
 )
 
@@ -101,7 +102,7 @@ func (s *matchMakingService) Match(wp domain.WaitingPlayer) (string, error) {
 		case <-tick:
 			matched, err := s.matchPlayer(wp)
 			if matched {
-				wsurl := Pick()
+				wsurl := util_app.Pick()
 				return wsurl, nil
 			}
 			if err != nil {

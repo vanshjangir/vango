@@ -10,6 +10,7 @@ import (
 	"github.com/vanshjangir/rapidgo/server/internal/applications/game_app"
 	"github.com/vanshjangir/rapidgo/server/internal/applications/mm_app"
 	"github.com/vanshjangir/rapidgo/server/internal/applications/user_app"
+	"github.com/vanshjangir/rapidgo/server/internal/applications/util_app"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	if err := mm_app.Load("./gameservers.json"); err != nil {
+	if err := util_app.Load("./gameservers.json"); err != nil {
 		log.Fatal("Error loading game servers", err)
 	}
 

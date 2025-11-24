@@ -8,6 +8,7 @@ import (
 	"github.com/vanshjangir/rapidgo/server/internal/adapters/pubsub_adp"
 	"github.com/vanshjangir/rapidgo/server/internal/adapters/ws_adp"
 	"github.com/vanshjangir/rapidgo/server/internal/applications/game_app"
+	"github.com/vanshjangir/rapidgo/server/internal/applications/spectate_app"
 	"github.com/vanshjangir/rapidgo/server/internal/applications/user_app"
 	"github.com/vanshjangir/rapidgo/server/internal/applications/ws_app"
 )
@@ -26,9 +27,12 @@ func main() {
 	userService := user_app.NewUserService(userRepo)
 	gameService := game_app.NewGameService(gameRepo)
 	wsGameService := ws_app.NewWsGameService(pubsubRepo, gameRepo, userRepo)
+	spectateSerivce := spectate_app.NewSpectateService(pubsubRepo)
 
-	wsHandler := ws_adp.NewWsHandler(userService, gameService, wsGameService)
+	wsHandler := ws_adp.NewWsHandler(userService, gameService, wsGameService, spectateSerivce)
 	wsHandler.RegisterRoutes()
+	
+	spectateSerivce.Start()
 	wsHandler.Run()
 
 	log.Println("Starting server")

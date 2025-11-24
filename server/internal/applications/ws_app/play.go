@@ -38,13 +38,14 @@ func (s *wsGameService) SetupGame(username string, repo ports.WsGameRepository) 
 		game.Color = domain.WhiteColor
 	}
 
-	if _, ok := s.gameMap[game.OpName]; ok {
-		game.State = s.gameMap[game.OpName].State
+	if _, ok := s.playerGameMap[game.OpName]; ok {
+		game.State = s.playerGameMap[game.OpName].State
 	} else {
 		game.SetupState(19)
 	}
 
-	s.gameMap[username] = game
+	s.gameMap[game.Id] = game
+	s.playerGameMap[username] = game
 	s.repoMap[username] = repo
 	return game, err
 }
@@ -116,7 +117,7 @@ func (s *wsGameService) checkTimer(game *domain.Game) {
 }
 
 func (s *wsGameService) LoadExistingGame(username string, repo ports.WsGameRepository) (*domain.Game, error) {
-	game, ok := s.gameMap[username]
+	game, ok := s.playerGameMap[username]
 	if !ok {
 		return nil, fmt.Errorf("Game not found")
 	}
@@ -164,15 +165,15 @@ func (s *wsGameService) Play(game *domain.Game) {
 		}
 
 		if out.ShouldSendToOp {
-			s.gameMap[game.OpName].IsOver = true
-			s.gameMap[game.OpName].CloseChan <- domain.GameCloseStatus{
+			s.playerGameMap[game.OpName].IsOver = true
+			s.playerGameMap[game.OpName].CloseChan <- domain.GameCloseStatus{
 				Code:           domain.OP_INTERNAL_ERROR,
 				ShouldSendToOp: false,
 			}
 		}
 
 		close(game.CloseChan)
-		delete(s.gameMap, game.PName)
+		delete(s.playerGameMap, game.PName)
 		s.SaveGame(game)
 		log.Println("Game Closed")
 		break

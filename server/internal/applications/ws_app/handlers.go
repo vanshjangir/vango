@@ -8,9 +8,17 @@ import (
 	"github.com/vanshjangir/rapidgo/server/internal/domain"
 )
 
+func (s *wsGameService) GetGameFromId(gameId int) *domain.Game {
+	return s.gameMap[gameId]
+}
+
+func (s *wsGameService) GetGameFromPlayerName(name string) *domain.Game {
+	return s.playerGameMap[name]
+}
+ 
 func (s *wsGameService) handleClientData(game *domain.Game, data []byte) (bool, error) {
 	shouldCancel := false
-	var msgType MsgType
+	var msgType domain.MsgType
 	err := json.Unmarshal(data, &msgType)
 	if err != nil {
 		return true, fmt.Errorf("handleClientData: Unmarshal type: %v", err)
@@ -40,8 +48,8 @@ func (s *wsGameService) handleClientData(game *domain.Game, data []byte) (bool, 
 }
 
 func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
-	var msgMove MsgMove
-	var msgMoveStatus MsgMoveStatus
+	var msgMove domain.MsgMove
+	var msgMoveStatus domain.MsgMoveStatus
 
 	msgMoveStatus.Type = "movestatus"
 	msgMoveStatus.Move = msgMove.Move
@@ -55,7 +63,8 @@ func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
 
 	if game.State.Turn != game.Color {
 		msgMoveStatus.Code = "INVALID_TURN"
-		if err := s.SendJSON(game, msgMoveStatus); err != nil {
+		err := s.SendJSON(game, msgMoveStatus);
+		if err != nil {
 			return fmt.Errorf("handleMove: Send invalid turn: %v", err)
 		}
 		return nil
@@ -73,25 +82,32 @@ func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
 	msgMove.State = boardState
 	msgMoveStatus.State = boardState
 
-	s.sendToOpLocally(game, msgMove)
-	if err := s.SendJSON(game, msgMoveStatus); err != nil {
+	s.SendToOpLocally(game, msgMove)
+	
+	err = s.SendJSON(game, msgMoveStatus)
+	if err != nil {
 		return fmt.Errorf("handleMove: sending msgMoveStatus: %v", err)
+	}
+
+	err = s.pr.Send(game, msgMove)
+	if err != nil {
+		return fmt.Errorf("handleMove: sending to pubsub: %v", err)
 	}
 
 	return nil
 }
 
 func (s *wsGameService) handleChat(game *domain.Game, data []byte) error {
-	var chatMsg MsgChat
+	var chatMsg domain.MsgChat
 	if err := json.Unmarshal(data, &chatMsg); err != nil {
 		return fmt.Errorf("handleChat: %v", err)
 	}
-	s.sendToOpLocally(game, chatMsg)
+	s.SendToOpLocally(game, chatMsg)
 	return nil
 }
 
 func (s *wsGameService) handleGameOverWhenError(game *domain.Game, by string, winner int) error {
-	var msgGameOver MsgGameOver
+	var msgGameOver domain.MsgGameOver
 	msgGameOver.Type = "gameover"
 	msgGameOver.By = by
 	msgGameOver.Winner = winner
@@ -104,7 +120,7 @@ func (s *wsGameService) handleGameOverWhenError(game *domain.Game, by string, wi
 }
 
 func (s *wsGameService) handleGameOver(game *domain.Game, by string, winner int) error {
-	var msgGameOver MsgGameOver
+	var msgGameOver domain.MsgGameOver
 	msgGameOver.Type = "gameover"
 	msgGameOver.By = by
 	msgGameOver.Winner = winner
@@ -112,11 +128,12 @@ func (s *wsGameService) handleGameOver(game *domain.Game, by string, winner int)
 	game.Winner = winner
 	game.WonBy = by
 
-	s.sendToOpLocally(game, msgGameOver)
+	s.SendToOpLocally(game, msgGameOver)
 	if err := s.SendJSON(game, msgGameOver); err != nil {
 		return err
 	}
 
+	delete(s.gameMap, game.Id)
 	return nil
 }
 
@@ -130,12 +147,12 @@ func (s *wsGameService) handleAbort(game *domain.Game) error {
 
 func (s *wsGameService) handleLocalMsg(game *domain.Game, msg any) bool {
 	switch msg := msg.(type) {
-	case MsgMove, MsgChat:
+	case domain.MsgMove, domain.MsgChat:
 		if err := s.SendJSON(game, msg); err != nil {
 			log.Println("handleLocalMsg: SendJSON for MsgMove, MsgChat:", err)
 			return true
 		}
-	case MsgGameOver:
+	case domain.MsgGameOver:
 		if err := s.SendJSON(game, msg); err != nil {
 			log.Println("handleLocalReceive: SendJSON for MsgGameOver", err)
 		}
