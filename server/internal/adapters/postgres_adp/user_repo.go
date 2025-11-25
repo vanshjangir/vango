@@ -1,7 +1,7 @@
 package postgres_adp
 
 import (
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/domain"
 	"gorm.io/gorm"
 )
 

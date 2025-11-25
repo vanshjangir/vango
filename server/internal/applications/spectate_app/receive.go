@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
-	"github.com/vanshjangir/rapidgo/server/internal/ports"
+	"github.com/vanshjangir/vango/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/ports"
 )
 
 func (s *spectateService) AddSpectator(game *domain.Game, repo ports.WsGameRepository) {

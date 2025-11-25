@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/vanshjangir/rapidgo/server/internal/applications/util_app"
+	"github.com/vanshjangir/vango/server/internal/applications/util_app"
 )
 
 func (s *userService) AuthGuest(token string) (string, error) {

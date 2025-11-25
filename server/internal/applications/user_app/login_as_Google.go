@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
-	"github.com/vanshjangir/rapidgo/server/internal/applications/util_app"
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/applications/util_app"
+	"github.com/vanshjangir/vango/server/internal/domain"
 )
 
 func (s *userService) LoginByGoogle(credentials string) (string, error) {

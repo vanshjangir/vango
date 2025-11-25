@@ -1,6 +1,6 @@
 package ports
 
-import "github.com/vanshjangir/rapidgo/server/internal/domain"
+import "github.com/vanshjangir/vango/server/internal/domain"
 
 type GameService interface {
 	SaveGame(g *domain.Game) error

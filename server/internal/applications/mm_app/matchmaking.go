@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vanshjangir/rapidgo/server/internal/applications/util_app"
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/applications/util_app"
+	"github.com/vanshjangir/vango/server/internal/domain"
 )
 
 var (

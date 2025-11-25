@@ -1,7 +1,7 @@
 package ports
 
 import (
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/domain"
 )
 
 type GameRepository interface {

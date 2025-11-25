@@ -1,8 +1,8 @@
 package ws_app
 
 import (
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
-	"github.com/vanshjangir/rapidgo/server/internal/ports"
+	"github.com/vanshjangir/vango/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/ports"
 )
 
 type wsGameService struct {

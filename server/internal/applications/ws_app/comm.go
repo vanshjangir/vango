@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/domain"
 )
 
 func (s *wsGameService) Send(game *domain.Game, data []byte) error {

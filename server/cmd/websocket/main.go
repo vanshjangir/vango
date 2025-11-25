@@ -4,13 +4,13 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
-	"github.com/vanshjangir/rapidgo/server/internal/adapters/postgres_adp"
-	"github.com/vanshjangir/rapidgo/server/internal/adapters/pubsub_adp"
-	"github.com/vanshjangir/rapidgo/server/internal/adapters/ws_adp"
-	"github.com/vanshjangir/rapidgo/server/internal/applications/game_app"
-	"github.com/vanshjangir/rapidgo/server/internal/applications/spectate_app"
-	"github.com/vanshjangir/rapidgo/server/internal/applications/user_app"
-	"github.com/vanshjangir/rapidgo/server/internal/applications/ws_app"
+	"github.com/vanshjangir/vango/server/internal/adapters/postgres_adp"
+	"github.com/vanshjangir/vango/server/internal/adapters/pubsub_adp"
+	"github.com/vanshjangir/vango/server/internal/adapters/ws_adp"
+	"github.com/vanshjangir/vango/server/internal/applications/game_app"
+	"github.com/vanshjangir/vango/server/internal/applications/spectate_app"
+	"github.com/vanshjangir/vango/server/internal/applications/user_app"
+	"github.com/vanshjangir/vango/server/internal/applications/ws_app"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/domain"
 )
 
 func (s *wsGameService) GetGameFromId(gameId int) *domain.Game {

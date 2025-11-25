@@ -7,8 +7,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
-	"github.com/vanshjangir/rapidgo/server/internal/ports"
+	"github.com/vanshjangir/vango/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/ports"
 )
 
 func (s *wsGameService) SetupGame(username string, repo ports.WsGameRepository) (*domain.Game, error) {

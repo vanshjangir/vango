@@ -1,6 +1,6 @@
 package spectate_app
 
-import "github.com/vanshjangir/rapidgo/server/internal/ports"
+import "github.com/vanshjangir/vango/server/internal/ports"
 
 type spectateService struct {
 	pr ports.PubSubRepository

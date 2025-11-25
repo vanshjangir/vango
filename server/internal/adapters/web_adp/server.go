@@ -3,7 +3,7 @@ package web_adp
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/vanshjangir/rapidgo/server/internal/ports"
+	"github.com/vanshjangir/vango/server/internal/ports"
 )
 
 type GinHandler struct {

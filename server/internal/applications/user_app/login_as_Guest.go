@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
-	"github.com/vanshjangir/rapidgo/server/internal/applications/util_app"
+	"github.com/vanshjangir/vango/server/internal/applications/util_app"
 )
 
 func (s *userService) LoginAsGuest(credentials string) (string, string, error) {

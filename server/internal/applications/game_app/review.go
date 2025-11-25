@@ -1,7 +1,7 @@
 package game_app
 
 import (
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/domain"
 )
 
 func (s *gameService) Review(gameid int) (domain.GameReview, error) {

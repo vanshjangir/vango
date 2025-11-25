@@ -3,7 +3,7 @@ package postgres_adp
 import (
 	"fmt"
 
-	"github.com/vanshjangir/rapidgo/server/internal/domain"
+	"github.com/vanshjangir/vango/server/internal/domain"
 	"gorm.io/gorm"
 )
 
