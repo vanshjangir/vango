@@ -58,7 +58,6 @@ func (s *matchMakingService) matchPlayer(p domain.WaitingPlayer) (bool, error) {
 		}
 		if abs(p.Rating-other.Rating) <= 100 {
 			twoWaitingPlayers := &[2]domain.WaitingPlayer{p, other}
-			matched[p.Username] = true
 			matched[username] = true
 
 			if err := s.CreateNewGame(

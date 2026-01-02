@@ -11,9 +11,9 @@ type UserService interface {
 	ChangeUsername(oldName, newName string) error
 	LoginByGoogle(credentials string) (string, error)
 	LoginAsGuest(credentials string) (string, string, error)
-	Signup(username, email, password string) error
 	AuthGoogle(token string) (string, error)
 	AuthGuest(token string) (string, error)
+	GetUser(username string) (domain.User, error)
 }
 
 type WsGameService interface {
@@ -21,7 +21,7 @@ type WsGameService interface {
 	SendJSON(game *domain.Game, obj any) error
 	Receive(game *domain.Game) ([]byte, error)
 	Close(game *domain.Game) error
-	Auth(repo WsGameRepository, us UserService) (string, error)
+	Auth(authHeader string, us UserService) (string, error)
 	Play(game *domain.Game)
 	SetupGame(username string, repo WsGameRepository) (*domain.Game, error)
 	LoadExistingGame(username string, repo WsGameRepository) (*domain.Game, error)

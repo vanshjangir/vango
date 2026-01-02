@@ -8,6 +8,12 @@ import (
 )
 
 func (wsh *WsHandler) reconnect(ctx *gin.Context) {
+	upgrader, err := getUpgrader(ctx)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Could not able to get upgrader"})
+		return
+	}
+	
 	w, r := ctx.Writer, ctx.Request
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

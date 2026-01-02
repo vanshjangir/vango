@@ -1,4 +1,4 @@
-package web_adp
+package ws_adp
 
 import (
 	"fmt"
@@ -9,13 +9,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (gh *GinHandler) httpAuth(ctx *gin.Context) {
-	authHeader := ctx.GetHeader("Authorization")
-	authData := strings.Split(authHeader, " ")
+func (wsh *WsHandler) wsAuth(ctx *gin.Context) {
+	authHeader := ctx.GetHeader("Sec-Websocket-Protocol")
+	authData := strings.Split(authHeader, ".")
 	tokenType := authData[0]
-	token := authData[1]
+	token := strings.Join(authData[1:], ".")
 
 	if tokenType == "" || token == "" {
+		log.Println("Token not found")
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Token not found"})
 		ctx.Abort()
 		return
@@ -25,9 +26,9 @@ func (gh *GinHandler) httpAuth(ctx *gin.Context) {
 	var username string
 	switch tokenType {
 	case "google":
-		username, err = gh.us.AuthGoogle(token)
+		username, err = wsh.us.AuthGoogle(token)
 	case "guest":
-		username, err = gh.us.AuthGuest(token)
+		username, err = wsh.us.AuthGuest(token)
 	default:
 		err = fmt.Errorf("Unsupported token type")
 	}
@@ -39,6 +40,7 @@ func (gh *GinHandler) httpAuth(ctx *gin.Context) {
 	} else {
 		ctx.Set("username", username)
 		ctx.Set("usertype", tokenType)
+		ctx.Set("protocolHeader", authHeader)
 		ctx.Next()
 	}
 }

@@ -16,5 +16,5 @@ func (s *userService) LoginAsGuest(credentials string) (string, string, error) {
 		return "", "", err
 	}
 
-	return token, username, nil
+	return username, token, nil
 }

@@ -1,33 +1,22 @@
 package ws_app
 
 import (
-	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/vanshjangir/vango/server/internal/ports"
 )
 
-type wsAuthRequest struct {
-	Type  string `json:"type"`
-	Token string `json:"token"`
-}
-
-func (s *wsGameService) Auth(repo ports.WsGameRepository, us ports.UserService) (string, error) {
-	data, err := repo.Receive()
-	if err != nil {
-		return "", err
-	}
-	var req wsAuthRequest
-	err = json.Unmarshal(data, &req)
-	if err != nil {
-		return "", fmt.Errorf("Error unmarhalling json")
-	}
-
-	switch req.Type {
+func (s *wsGameService) Auth(authHeader string, us ports.UserService) (string, error) {
+	tokenData := strings.Split(authHeader, " ")
+	tokenType := tokenData[0]
+	token := tokenData[1]
+	
+	switch tokenType {
 	case "google":
-		return us.AuthGoogle(req.Token)
+		return us.AuthGoogle(token)
 	case "guest":
-		return us.AuthGuest(req.Token)
+		return us.AuthGuest(token)
 	default:
 		return "", fmt.Errorf("Unsupported token type")
 	}

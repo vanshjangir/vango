@@ -35,6 +35,9 @@ func (s *wsGameService) handleClientData(game *domain.Game, data []byte) (bool, 
 	case "chat":
 		err = s.handleChat(game, data)
 
+	case "syncstate":
+		err = s.handleSync(game)
+
 	default:
 		err = nil
 	}
@@ -53,7 +56,8 @@ func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
 
 	msgMoveStatus.Type = "movestatus"
 	msgMoveStatus.Move = msgMove.Move
-	msgMoveStatus.PassedTime = game.GetRemainingTime()
+	msgMoveStatus.PRemTime = game.GetRemainingTime()
+	msgMoveStatus.OpRemTime = s.playerGameMap[game.OpName].GetRemainingTime()
 	msgMoveStatus.Code = "VALID"
 
 	err := json.Unmarshal(data, &msgMove)
@@ -160,4 +164,32 @@ func (s *wsGameService) handleLocalMsg(game *domain.Game, msg any) bool {
 	}
 
 	return false
+}
+
+func (s *wsGameService) handleSync(game *domain.Game) error {
+	var err error
+	var msgSync domain.MsgSyncState
+	msgSync.Type = "syncstate"
+	msgSync.History = game.State.History
+	msgSync.State, err = game.State.Board.Encode()
+	if err != nil {
+		return fmt.Errorf("handleSync: Encode: %v", err)
+	}
+	
+	if game.Color == domain.WhiteColor {
+		msgSync.WhiteName = game.PName
+		msgSync.BlackName = game.OpName
+		msgSync.WhiteRemTime = game.GetRemainingTime()
+		msgSync.BlackRemTime = s.playerGameMap[game.OpName].GetRemainingTime()
+	} else {
+		msgSync.BlackName = game.PName
+		msgSync.WhiteName = game.OpName
+		msgSync.BlackRemTime = game.GetRemainingTime()
+		msgSync.WhiteRemTime = s.playerGameMap[game.OpName].GetRemainingTime()
+	}
+	if err := s.SendJSON(game, msgSync); err != nil {
+		return fmt.Errorf("handleSync: SendJSON: %v", err)
+	}
+
+	return nil
 }

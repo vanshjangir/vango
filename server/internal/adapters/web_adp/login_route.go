@@ -2,15 +2,13 @@ package web_adp
 
 import "github.com/gin-gonic/gin"
 
-type loginData struct {
+type LoginRequestPayload struct {
 	Type        string `json:"type"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	Credentials string `json:"credential"`
+	Credentials string `json:"credentials"`
 }
 
 func (gh *GinHandler) login(ctx *gin.Context) {
-	var req loginData
+	var req LoginRequestPayload
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(400, gin.H{"error": "Invalid request body"})
 		return

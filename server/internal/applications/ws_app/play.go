@@ -131,10 +131,38 @@ func (s *wsGameService) SaveGame(game *domain.Game) {
 	}
 }
 
+func (s *wsGameService) waitForOp(game *domain.Game) {
+	limit := 10
+	for {
+		_, ok := s.playerGameMap[game.OpName]
+		if ok {
+			err := s.SendStartConfirmation(game)
+			if err != nil {
+				log.Println("Error sending start confirmation:", err)
+				game.CloseChan <- domain.GameCloseStatus{
+					Code: domain.OP_INTERNAL_ERROR,
+					ShouldSendToOp: false,
+				}
+			}
+			break
+		}
+		if limit == 0 {
+			game.CloseChan <- domain.GameCloseStatus{
+				Code: domain.OP_INTERNAL_ERROR,
+				ShouldSendToOp: false,
+			}
+			break
+		}
+		time.Sleep(1 * time.Second)
+		limit -= 1
+	}
+}
+
 func (s *wsGameService) Play(game *domain.Game) {
 	go s.ReceiveFromClient(game)
 	go s.ReceiveLocally(game)
 	go s.checkTimer(game)
+	go s.waitForOp(game)
 
 	for {
 		out := <-game.CloseChan
@@ -153,7 +181,8 @@ func (s *wsGameService) Play(game *domain.Game) {
 		log.Println("Closing game...")
 
 		if out.Code == domain.OP_INTERNAL_ERROR {
-			if err := s.handleGameOverWhenError(game, "disconnection", game.Color); err != nil {
+			if err := s.handleGameOverWhenError(game, "disconnection", game.Color);
+			err != nil {
 				log.Println("domain.INTERNAL_ERROR: ", err)
 			}
 		}
@@ -164,18 +193,22 @@ func (s *wsGameService) Play(game *domain.Game) {
 			}
 		}
 
-		if out.ShouldSendToOp {
-			s.playerGameMap[game.OpName].IsOver = true
-			s.playerGameMap[game.OpName].CloseChan <- domain.GameCloseStatus{
-				Code:           domain.OP_INTERNAL_ERROR,
-				ShouldSendToOp: false,
-			}
-		}
-
 		close(game.CloseChan)
 		delete(s.playerGameMap, game.PName)
 		s.SaveGame(game)
 		log.Println("Game Closed")
+
+		if out.ShouldSendToOp {
+			_, ok := s.playerGameMap[game.OpName]
+			if ok {
+				s.playerGameMap[game.OpName].IsOver = true
+				s.playerGameMap[game.OpName].CloseChan <- domain.GameCloseStatus{
+					Code:           domain.OP_INTERNAL_ERROR,
+					ShouldSendToOp: false,
+				}
+			}
+		}
+		
 		break
 	}
 }

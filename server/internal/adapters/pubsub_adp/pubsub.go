@@ -56,13 +56,13 @@ func (r *PubsubRepo) GetGameFromUsername(
 	hashKey := "live_game"
 	rawJsonString, err := r.rdb.HGet(r.ctx, hashKey, username).Result()
 	if err != nil {
-		return nil, fmt.Errorf("GetGameFromUsername: %v", err)
+		return nil, fmt.Errorf("GetGameFromUsername: redis: %v", err)
 	}
 
 	var gameData domain.GameDataForPlayer
 	err = json.Unmarshal([]byte(rawJsonString), &gameData)
 	if err != nil {
-		return nil, fmt.Errorf("GetGameFromUsername: %v", err)
+		return nil, fmt.Errorf("GetGameFromUsername: json: %v", err)
 	}
 
 	return &gameData, nil

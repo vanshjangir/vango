@@ -52,14 +52,14 @@ type MsgStart struct {
 type MsgMove struct {
 	Type       string `json:"type"`
 	Move       string `json:"move"`
-	PassedTime int    `json:"time"`
 	State      string `json:"state"`
 }
 
 type MsgMoveStatus struct {
 	Type       string `json:"type"`
 	Move       string `json:"move"`
-	PassedTime int    `json:"time"`
+	PRemTime int    `json:"pRemTime"`
+	OpRemTime int    `json:"opRemTime"`
 	State      string `json:"state"`
 	Code       string `json:"code"`
 }
@@ -86,6 +86,6 @@ type MsgSyncState struct {
 	WhiteName string `json:"whitename"`
 	State string `json:"state"`
 	History StringArray `json:"history"`
-	BlackRemTime int `json:"blackPassedTime"`
-	WhiteRemTime int `json:"whitePassedTime"`
+	BlackRemTime int `json:"blackRemTime"`
+	WhiteRemTime int `json:"whiteRemTime"`
 }

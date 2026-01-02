@@ -10,12 +10,12 @@ import (
 func (s *userService) AuthGuest(token string) (string, error) {
 	jwtToken, err := util_app.VerifyGuestToken(token)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("AuthGuest: VerifyGuestToken: %v", err)
 	}
 
 	claims, ok := jwtToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", fmt.Errorf("Invalid jwt Claims")
+		return "", fmt.Errorf("AuthGuest: Invalid jwt Claims")
 	} else {
 		return claims["username"].(string), nil
 	}
