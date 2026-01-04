@@ -1,5 +1,7 @@
 export interface MsgStart {
   type: "start";
+  color: number;
+  gameid: number;
 }
 
 export interface MsgStop {
@@ -17,7 +19,7 @@ export interface MsgAbort {
 export interface MsgGameover {
   type: "gameover";
   winner: number;
-  message: string;
+  by: string;
 }
 
 export interface MsgMoveStatus {
@@ -25,14 +27,16 @@ export interface MsgMoveStatus {
   move: string;
   code: string;
   state: string;
-  pRemTime: number;
-  opRemTime: number;
+  blackRemTime: number;
+  whiteRemTime: number;
 }
 
 export interface MsgMove {
   type: "move";
   move: string;
   state: string;
+  blackRemTime: number;
+  whiteRemTime: number;
 }
 
 export interface MsgSync {

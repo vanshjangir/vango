@@ -71,36 +71,23 @@ const Home = () => {
                 boxShadow="0 20px 40px rgba(0, 0, 0, 0.4)" 
                 w="542px"
                 h="542px"
-                rounded="xl"
-                transition="all 0.3s ease"
-                _hover={{
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 25px 50px rgba(0, 0, 0, 0.5)"
-                }}
+                rounded="4px"
               />
             </Box>
           </Box>
 
-          {/* Game Options Section */}
           <VStack 
-            spacing={8} 
+            spacing={4} 
             align="center" 
             justify="center" 
             h={{ base: "auto", lg: "542px" }} 
             w={{ base: "auto", lg: "542px" }} 
           >
-            {/* Status Box */}
             <Box
-              bg="linear-gradient(135deg, rgba(26, 32, 44, 0.9), rgba(45, 55, 72, 0.8))"
-              backdropFilter="blur(12px)"
-              rounded="2xl"
-              p={4}
-              border="2px solid"
-              borderColor="whiteAlpha.200"
-              boxShadow="0 8px 32px rgba(0, 0, 0, 0.3)"
+              rounded="2px"
+              h="60px"
               w="full"
             >
-              {/* Gradient overlay */}
               <Box
                 position="absolute"
                 top="0"
@@ -112,24 +99,9 @@ const Home = () => {
               {matchStatus === "pending" ? (
                 <VStack spacing={4}>
                   <HStack spacing={2} justify="center">
-                    <Box
-                      w="12px"
-                      h="12px"
-                      bg="orange.400"
-                      borderRadius="full"
-                    />
-                    <Box
-                      w="12px"
-                      h="12px"
-                      bg="orange.300"
-                      borderRadius="full"
-                    />
-                    <Box
-                      w="12px"
-                      h="12px"
-                      bg="orange.200"
-                      borderRadius="full"
-                    />
+                    <Box w="12px" h="12px" bg="orange.400" borderRadius="full"/>
+                    <Box w="12px" h="12px" bg="orange.300" borderRadius="full"/>
+                    <Box w="12px" h="12px" bg="orange.200" borderRadius="full"/>
                   </HStack>
                   <Text 
                     fontSize="xl" 
@@ -160,15 +132,14 @@ const Home = () => {
                   </VStack>
                 )}
             </Box>
-
-            {/* Game Buttons */}
-            <VStack spacing={4} w="full">
-              <PlayButton
-                label={"Play Online"}
-                gametype="player"
-                handler={findGame}
-              />
-            </VStack>
+            <PlayButton
+              label={"Play Online"}
+              handler={findGame}
+            />
+            <PlayButton
+              label={"Spectate"}
+              handler={findGame}
+            />
           </VStack>
         </HStack>
       </Container>

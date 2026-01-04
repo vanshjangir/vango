@@ -53,13 +53,15 @@ type MsgMove struct {
 	Type       string `json:"type"`
 	Move       string `json:"move"`
 	State      string `json:"state"`
+	BlackRemTime int    `json:"blackRemTime"`
+	WhiteRemTime int    `json:"whiteRemTime"`
 }
 
 type MsgMoveStatus struct {
 	Type       string `json:"type"`
 	Move       string `json:"move"`
-	PRemTime int    `json:"pRemTime"`
-	OpRemTime int    `json:"opRemTime"`
+	BlackRemTime int    `json:"blackRemTime"`
+	WhiteRemTime int    `json:"whiteRemTime"`
 	State      string `json:"state"`
 	Code       string `json:"code"`
 }
@@ -69,9 +71,9 @@ type MsgAbort struct {
 }
 
 type MsgGameOver struct {
-	Type   string `json:"gameover"`
-	By     string `json:"by"`
+	Type   string `json:"type"`
 	Winner int    `json:"winner"`
+	By     string `json:"by"`
 }
 
 type MsgChat struct {
@@ -80,7 +82,7 @@ type MsgChat struct {
 }
 
 type MsgSyncState struct {
-	Type string `json:"syncstate"`
+	Type string `json:"type"`
 	Gameid int `json:"gameid"`
 	BlackName string `json:"blackname"`
 	WhiteName string `json:"whitename"`

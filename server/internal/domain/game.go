@@ -46,12 +46,12 @@ type GameState struct {
 
 type Game struct {
 	Id            int
-	MaxTime       int
+	RemTime       int
+	LastStoredTime time.Time
 	Color         int
 	PName         string
 	OpName        string
 	LocalRecv     chan any
-	StartTimeUnix int
 	Winner        int
 	WonBy         string
 
@@ -84,12 +84,12 @@ func (g *Game) SetupState(size int) {
 	g.State.Board.Init(g.State.Size)
 }
 
-func (g *Game) Init(id int, playerName, opponentName string, size, maxTime int, startTime int) {
+func (g *Game) Init(id int, playerName, opponentName string, size, maxTime int) {
 	g.Id = id
 	g.PName = playerName
 	g.OpName = opponentName
-	g.StartTimeUnix = startTime
-	g.MaxTime = maxTime
+	g.RemTime = maxTime
+	g.LastStoredTime = time.Now()
 	g.CloseChan = make(chan GameCloseStatus)
 	g.IsOver = false
 	g.IsOnline = true
@@ -101,7 +101,11 @@ func (g *Game) Init(id int, playerName, opponentName string, size, maxTime int, 
 }
 
 func (g *Game) GetRemainingTime() int {
-	return g.MaxTime - int(time.Now().Unix()-int64(g.StartTimeUnix))
+	if g.Color == g.State.Turn {
+		return g.RemTime - int(time.Since(g.LastStoredTime).Milliseconds())
+	} else {
+		return g.RemTime
+	}
 }
 
 func (g *Game) MakeMove(move string) (string, error) {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/vanshjangir/vango/server/internal/domain"
 )
@@ -52,17 +53,21 @@ func (s *wsGameService) handleClientData(game *domain.Game, data []byte) (bool, 
 
 func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
 	var msgMove domain.MsgMove
-	var msgMoveStatus domain.MsgMoveStatus
-
-	msgMoveStatus.Type = "movestatus"
-	msgMoveStatus.Move = msgMove.Move
-	msgMoveStatus.PRemTime = game.GetRemainingTime()
-	msgMoveStatus.OpRemTime = s.playerGameMap[game.OpName].GetRemainingTime()
-	msgMoveStatus.Code = "VALID"
-
 	err := json.Unmarshal(data, &msgMove)
 	if err != nil {
 		return fmt.Errorf("handleMove: unmarshalling msgMove: %v", err)
+	}
+
+	var msgMoveStatus domain.MsgMoveStatus
+	msgMoveStatus.Type = "movestatus"
+	msgMoveStatus.Code = "VALID"
+	msgMoveStatus.Move = msgMove.Move
+	if game.Color == domain.BlackColor {
+		msgMoveStatus.BlackRemTime = game.GetRemainingTime()
+		msgMoveStatus.WhiteRemTime = s.playerGameMap[game.OpName].GetRemainingTime()
+	} else {
+		msgMoveStatus.WhiteRemTime = game.GetRemainingTime()
+		msgMoveStatus.BlackRemTime = s.playerGameMap[game.OpName].GetRemainingTime()
 	}
 
 	if game.State.Turn != game.Color {
@@ -83,8 +88,19 @@ func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
 		return nil
 	}
 
+	opGame := s.playerGameMap[game.OpName]
+	if game.State.Turn != game.Color {
+		game.RemTime -= int(time.Since(game.LastStoredTime).Milliseconds())
+		opGame.LastStoredTime = time.Now()
+	} else {
+		opGame.RemTime -= int(time.Since(opGame.LastStoredTime).Milliseconds())
+		game.LastStoredTime = time.Now()
+	}
+
 	msgMove.State = boardState
 	msgMoveStatus.State = boardState
+	msgMove.WhiteRemTime = msgMoveStatus.WhiteRemTime
+	msgMove.BlackRemTime = msgMoveStatus.BlackRemTime
 
 	s.SendToOpLocally(game, msgMove)
 	
@@ -137,7 +153,6 @@ func (s *wsGameService) handleGameOver(game *domain.Game, by string, winner int)
 		return err
 	}
 
-	delete(s.gameMap, game.Id)
 	return nil
 }
 

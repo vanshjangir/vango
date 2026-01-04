@@ -25,13 +25,7 @@ func (s *wsGameService) SetupGame(username string, repo ports.WsGameRepository) 
 	}
 
 	game := new(domain.Game)
-	game.Init(
-		gameData.GameId,
-		pname, opname,
-		19, 5*60*1000,
-		//int(gameData.StartTime.Unix()),
-		int(time.Now().Unix()), // for testing
-	)
+	game.Init(gameData.GameId, pname, opname, 19, 1*60*1000)
 	if username == gameData.BlackName {
 		game.Color = domain.BlackColor
 	} else {
@@ -105,6 +99,10 @@ func (s *wsGameService) checkTimer(game *domain.Game) {
 			return
 		default:
 			if game.CheckTimeout() {
+				err := s.handleGameOver(game, "timeout", 1 - game.Color)
+				if err != nil {
+					log.Println("checkTimer: handleGameover:", err)
+				}
 				game.CloseChan <- domain.GameCloseStatus{
 					Code:           domain.TIMER_OUT,
 					ShouldSendToOp: false,
@@ -178,7 +176,7 @@ func (s *wsGameService) Play(game *domain.Game) {
 		}
 
 		game.IsOver = true
-		log.Println("Closing game...")
+		log.Println("Closing game...", out.Code)
 
 		if out.Code == domain.OP_INTERNAL_ERROR {
 			if err := s.handleGameOverWhenError(game, "disconnection", game.Color);
@@ -194,8 +192,10 @@ func (s *wsGameService) Play(game *domain.Game) {
 		}
 
 		close(game.CloseChan)
-		delete(s.playerGameMap, game.PName)
 		s.SaveGame(game)
+		safedelete(s.mu, s.playerGameMap, game.PName)
+		safedelete(s.mu, s.repoMap, game.PName)
+		safedelete(s.mu, s.gameMap, game.Id)
 		log.Println("Game Closed")
 
 		if out.ShouldSendToOp {
