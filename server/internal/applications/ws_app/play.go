@@ -123,6 +123,14 @@ func (s *wsGameService) LoadExistingGame(username string, repo ports.WsGameRepos
 	return game, nil
 }
 
+func (s *wsGameService) GameExists(username string) bool {
+	_, ok := s.playerGameMap[username]
+	if ok {
+		return true
+	}
+	return false
+}
+
 func (s *wsGameService) SaveGame(game *domain.Game) {
 	if err := s.gr.SaveGame(game); err != nil {
 		log.Println("Error in SaveGame:", err)

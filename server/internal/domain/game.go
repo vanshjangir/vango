@@ -109,6 +109,13 @@ func (g *Game) GetRemainingTime() int {
 }
 
 func (g *Game) MakeMove(move string) (string, error) {
+	if move == "ps" {
+		g.State.Turn = 1 - g.State.Turn
+		g.State.History = append(g.State.History, move)
+		encode, err := g.State.Board.Encode()
+		return encode, err
+	}
+	
 	col := int(move[0] - 'a')
 	row, err := strconv.Atoi(move[1:])
 	if err != nil {

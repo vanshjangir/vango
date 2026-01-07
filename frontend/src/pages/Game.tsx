@@ -17,6 +17,9 @@ import {
   Flex,
   VStack,
   Text,
+  Input,
+  Button,
+  HStack,
 } from "@chakra-ui/react";
 
 const Game: React.FC = () => {
@@ -28,10 +31,13 @@ const Game: React.FC = () => {
   const [pRemTime, setPRemTime] = useState<number>(60000);
   const [opRemTime, setOpRemTime] = useState<number>(60000);
   const [history, setHistory] = useState<string[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState<string>("");
   const tickRef = useRef<boolean>(false);
   const turnRef = useRef<number>(BLACK_CELL);
   const [msg, setMsg] = useState<string>("Starting...");
   const historyBoxRef = useRef<HTMLDivElement>(null);
+  const chatBoxRef = useRef<HTMLDivElement>(null);
 
   let started = false;
 
@@ -127,8 +133,9 @@ const Game: React.FC = () => {
       case "chat":
         messages.current = [
           ...messages.current,
-          { type: 'received', text: msg.message.trim() }
+          { type: 'received', text: msg.text.trim() }
         ];
+        setChatMessages([...messages.current]);
         break;
     }
   };
@@ -225,6 +232,37 @@ const Game: React.FC = () => {
   })
 
   useEffect(() => {
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  const sendChatMessage = () => {
+    const socket = socketRef.current;
+    const text = chatInput.trim();
+    if (!socket || !text) return;
+    socket.send(JSON.stringify({ type: "chat", text: text }));
+    messages.current = [
+      ...messages.current,
+      { type: "sent", text }
+    ];
+    setChatMessages([...messages.current]);
+    setChatInput("");
+  };
+
+  const sendPassMove = () => {
+    const socket = socketRef.current;
+    if (!socket) return;
+    socket.send(JSON.stringify({ type: "move", move: "ps" }));
+  };
+
+  const sendAbort = () => {
+    const socket = socketRef.current;
+    if (!socket) return;
+    socket.send(JSON.stringify({ type: "abort" }));
+  };
+
+  useEffect(() => {
     startSetup();
   }, []);
 
@@ -233,10 +271,8 @@ const Game: React.FC = () => {
       minH="100vh" 
       display="flex" 
       flexDirection="column" 
-      bg="linear-gradient(135deg, #1a202c 0%, #2d3748 25%, #4a5568 50%, #2d3748 75%, #1a202c 100%)"
+      bg="black"
       overflowY="auto"
-      position="relative"
-      overflow="hidden"
     >
       <Navbar />
       <Flex 
@@ -247,8 +283,6 @@ const Game: React.FC = () => {
         justifyContent="center"
         gap={8}
         p={6}
-        position="relative"
-        zIndex={1}
       >
         <VStack 
           id="game-board" 
@@ -262,12 +296,9 @@ const Game: React.FC = () => {
             width={gridSize + 2 * cellSize}
             height={gridSize + 2 * cellSize}
             style={{
-              position: "relative",
-              zIndex: 2,
               backgroundColor: "#fef3c7",
-              borderRadius: "4px",
-              border: "3px solid rgba(246, 173, 85, 0.3)",
-              boxShadow: "0 25px 50px rgba(0, 0, 0, 0.5)"
+              borderRadius: "2px",
+              border: "1px solid #1f2937"
             }}
           />
         </VStack>
@@ -280,39 +311,68 @@ const Game: React.FC = () => {
           <Box
             px={4}
             py={3}
-            borderRadius="md"
+            borderRadius="2px"
             bg={gsRef.current?.color === BLACK_CELL ? "gray.900" : "gray.100"}
             color={gsRef.current?.color === BLACK_CELL ? "white" : "black"}
-            border={gsRef.current?.color === turnRef.current ? "4px solid" : "4px dashed"}
-            borderColor={gsRef.current?.color === turnRef.current ? "green.400" : "gray.400"}
+            border="4px solid"
+            borderColor={gsRef.current?.color === turnRef.current ? "green.500" : "gray.700"}
             minW="320px"
             textAlign="center"
           >
-            <Box fontSize="sm" opacity={0.7}>{gsRef.current?.opname}</Box>
-            <Box fontSize="lg" fontWeight="bold">{formatTime(opRemTime)}</Box>
-            <Box fontSize="lg" fontWeight="bold">{formatTime(pRemTime)}</Box>
+            <Box fontSize="sm" opacity={0.7}>{gsRef.current?.opname ? gsRef.current?.opname : "Loading..."}</Box>
+            <Box fontSize="lg" fontWeight="600">{formatTime(opRemTime)}</Box>
+            <Box fontSize="lg" fontWeight="600">{formatTime(pRemTime)}</Box>
             <Box fontSize="sm" opacity={0.7}>
-              {gsRef.current?.pname} {gsRef.current?.color === turnRef.current ? "(Your turn)" : ""}
+              {gsRef.current?.opname ? gsRef.current?.opname : "Loading..."}
+              {gsRef.current?.color === turnRef.current ? "(Your turn)" : ""}
             </Box>
           </Box>
           <Box
             fontSize={"4xl"}
             color={"white"}
             minW="320px"
+            minH="54px"
             textAlign="center"
+            fontWeight="500"
           >
             {msg}
           </Box>
+          <HStack w="320px" spacing={3}>
+            <Button
+              flex={1}
+              size="sm"
+              onClick={sendPassMove}
+              bg="green.600"
+              color="white"
+              rounded={"2px"}
+              _hover={{ bg: "green.500" }}
+            >
+              Pass
+            </Button>
+            <Button
+              flex={1}
+              size="sm"
+              onClick={sendAbort}
+              bg="red.600"
+              color="white"
+              rounded={"2px"}
+              _hover={{ bg: "red.500" }}
+            >
+              Abort
+            </Button>
+          </HStack>
           <Box
             w="320px"
-            h="300px"
+            h="220px"
             overflowY="auto"
-            bg="gray.800"
+            bg="gray.900"
             ref={historyBoxRef}
-            borderRadius="4px"
+            borderRadius="2px"
+            border="1px solid"
+            borderColor="gray.800"
             css={{
-              "&::-webkit-scrollbar": { display: "none" },
-              scrollbarWidth: "none"
+              "&::-webkit-scrollbar": { width: "6px" },
+              "&::-webkit-scrollbar-thumb": { background: "#4b5563", borderRadius: "4px" },
             }}
           >
             <VStack align="stretch" spacing={0}>
@@ -327,15 +387,15 @@ const Game: React.FC = () => {
                       flex={1}
                       px={3}
                       py={2}
-                      bg={blackMove ? "gray.900" : "gray.800"}
+                      bg={blackMove ? "gray.800" : "gray.900"}
                       textAlign="center"
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
                     >
                       <Text
-                        color={blackMove ? "white" : "gray.500"}
-                        fontWeight="semibold"
+                        color={blackMove ? "white" : "gray.600"}
+                        fontWeight="500"
                         fontSize="sm"
                       >
                         {moveIndex + 1}. {blackMove === "ps" ? "Pass" : blackMove || ""}
@@ -345,15 +405,15 @@ const Game: React.FC = () => {
                       flex={1}
                       px={3}
                       py={2}
-                      bg={whiteMove ? "gray.100" : "gray.800"}
+                      bg={whiteMove ? "gray.100" : "gray.900"}
                       textAlign="center"
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
                     >
                       <Text
-                        color={whiteMove ? "black" : "gray.500"}
-                        fontWeight="semibold"
+                        color={whiteMove ? "black" : "gray.600"}
+                        fontWeight="500"
                         fontSize="sm"
                       >
                         {whiteMove ? `${moveIndex + 2}. ${whiteMove === "ps" ? "Pass" : whiteMove}` : ""}
@@ -363,11 +423,77 @@ const Game: React.FC = () => {
                 );
               })}
               {history.length === 0 && (
-                <Text color="gray.400" textAlign="center" py={4} fontSize="sm">
+                <Text color="gray.500" textAlign="center" py={4} fontSize="sm">
                   No moves yet
                 </Text>
               )}
             </VStack>
+          </Box>
+          <Box
+            w="320px"
+            h="228px"
+            bg="gray.900"
+            borderRadius="2px"
+            border="1px solid"
+            borderColor="gray.800"
+            overflow="hidden"
+            display="flex"
+            flexDirection="column"
+            gap={3}
+            p={3}
+          >
+            <Text fontSize="md" fontWeight="600" color="white" mb={1}>
+              Chat
+            </Text>
+            <Box
+              ref={chatBoxRef}
+              flex="1"
+              overflowY="auto"
+              css={{
+                "&::-webkit-scrollbar": { width: "6px" },
+                "&::-webkit-scrollbar-thumb": { background: "#4b5563", borderRadius: "4px" },
+              }}
+            >
+              <VStack align="stretch" spacing={2}>
+                {chatMessages.map((m, idx) => (
+                  <Flex key={idx} justify={m.type === "sent" ? "flex-end" : "flex-start"}>
+                    <Box
+                      maxW="80%"
+                      px={3}
+                      py={2}
+                      borderRadius="md"
+                      color={m.type === "sent" ? "white" : "gray.400"}
+                      fontSize="sm"
+                      boxShadow="sm"
+                    >
+                      {m.text}
+                    </Box>
+                  </Flex>
+                ))}
+                {chatMessages.length === 0 && (
+                  <Text color="gray.500" fontSize="sm" textAlign="center">
+                    No messages yet
+                  </Text>
+                )}
+              </VStack>
+            </Box>
+            <HStack>
+              <Input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Type a message..."
+                bg="gray.800"
+                borderColor="gray.700"
+                color="white"
+                _placeholder={{ color: "gray.500" }}
+              />
+              <Button
+                onClick={sendChatMessage}
+                colorScheme="blue"
+              >
+                Send
+              </Button>
+            </HStack>
           </Box>
         </VStack>
       </Flex>

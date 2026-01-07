@@ -76,11 +76,9 @@ const Login: React.FC = () => {
   return (
     <Flex 
       minH="100vh" 
-      bg="linear-gradient(135deg, #1a202c 0%, #2d3748 25%, #4a5568 50%, #2d3748 75%, #1a202c 100%)"
+      bg="black"
       color="white" 
       direction="column"
-      position="relative"
-      overflow="hidden"
     >
       <Flex
         direction="column"
@@ -89,24 +87,22 @@ const Login: React.FC = () => {
         flex="1"
         px={6}
         py={12}
-        position="relative"
-        zIndex={1}
       >
         {/* Error Message */}
         {error && (
           <Box
-            bg="red.900"
-            borderColor="red.500"
+            bg="gray.900"
+            borderColor="red.800"
             border="1px solid"
-            color="red.200"
+            color="red.400"
             px={4}
             py={3}
-            borderRadius="lg"
+            borderRadius="2px"
             mb={6}
             maxW="md"
             w="full"
           >
-            <Text textAlign="center">{error}</Text>
+            <Text textAlign="center" fontWeight="500">{error}</Text>
           </Box>
         )}
 
@@ -114,9 +110,11 @@ const Login: React.FC = () => {
         <Box 
           w="full" 
           maxW="md" 
-          backdropFilter="blur(12px)"
-          p={8} 
-          boxShadow="0 8px 32px rgba(0, 0, 0, 0.3)"
+          bg="gray.900"
+          border="1px solid"
+          borderColor="gray.800"
+          p={8}
+          borderRadius="2px"
         >
           <VStack spacing={6}>
             <GoogleLogin
@@ -130,25 +128,21 @@ const Login: React.FC = () => {
               useOneTap
             />
             
-            <Divider borderColor="whiteAlpha.300" flex="1" />
+            <Divider borderColor="gray.700" flex="1" />
 
             <Button
               onClick={handleGuestLogin}
               w="176px"
               py={3}
               h="auto"
-              bg="linear-gradient(135deg, #f6ad55, #ed8936)"
-              color="white"
-              borderRadius="4px"
-              fontWeight="700"
+              bg="white"
+              color="gray.900"
+              borderRadius="2px"
+              fontWeight="200"
               fontSize="lg"
-              transition="all 0.3s ease"
               _hover={{ 
-                transform: "translateY(-2px)",
-                boxShadow: "0 8px 25px rgba(237, 137, 54, 0.3)",
-                bg: "linear-gradient(135deg, #ed8936, #dd6b20)"
+                bg: "gray.100"
               }}
-              _active={{ transform: "translateY(0)" }}
             >
               Login as Guest
             </Button>

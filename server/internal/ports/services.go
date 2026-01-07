@@ -25,6 +25,7 @@ type WsGameService interface {
 	Play(game *domain.Game)
 	SetupGame(username string, repo WsGameRepository) (*domain.Game, error)
 	LoadExistingGame(username string, repo WsGameRepository) (*domain.Game, error)
+	GameExists(username string) bool
 	SendStartConfirmation(game *domain.Game) error
 	GetGameFromId(gameId int) *domain.Game
 	GetGameFromPlayerName(name string) *domain.Game

@@ -27,6 +27,49 @@ func getUpgrader (ctx *gin.Context) (websocket.Upgrader, error) {
 	return upgrader, nil
 }
 
+func (wsh *WsHandler) startNewGame(
+	username string,
+	wsGameRepo *WsGameRepo,
+	c *websocket.Conn,
+) {
+	game, err := wsh.ws.SetupGame(username, wsGameRepo)
+	if err != nil {
+		log.Println("Error setting up game:", err)
+		c.WriteMessage(websocket.TextMessage, []byte("Server Error occurred"))
+		c.Close()
+		return
+	}
+	
+	go wsh.ws.Play(game)
+}
+
+func (wsh *WsHandler) reconnectExistingGame(
+	username string,
+	wsGameRepo *WsGameRepo,
+	c *websocket.Conn,
+) {
+	game, err := wsh.ws.LoadExistingGame(username, wsGameRepo)
+	if err != nil {
+		log.Println("Error reconnecting to game for user", username, err)
+		c.WriteMessage(websocket.TextMessage, []byte("Server Error occurred"))
+		c.Close()
+		return
+	}
+	
+	game.IsOnline = true
+	*game.ReconnectChan <- true
+	
+	err = wsh.ws.SendStartConfirmation(game)
+	if err != nil {
+		log.Println("reconnectExistingGame: SendStartConfirmation:", username, err)
+		c.WriteMessage(websocket.TextMessage, []byte("Server Error occurred"))
+		c.Close()
+		return
+	}
+	
+	log.Printf("Player %v reconnected\n", username)
+}
+
 func (wsh *WsHandler) play(ctx *gin.Context) {
 	usernameItf, exists := ctx.Get("username")
 	if !exists {
@@ -52,13 +95,10 @@ func (wsh *WsHandler) play(ctx *gin.Context) {
 	}
 	
 	wsGameRepo := NewWebsocketGameRepo(c)
-	game, err := wsh.ws.SetupGame(username, wsGameRepo)
-	if err != nil {
-		log.Println("Error setting up game:", err)
-		c.WriteMessage(websocket.TextMessage, []byte("Server Error occurred"))
-		c.Close()
-		return
+	
+	if wsh.ws.GameExists(username) {
+		wsh.reconnectExistingGame(username, wsGameRepo, c)
+	} else {
+		wsh.startNewGame(username, wsGameRepo, c)
 	}
-
-	go wsh.ws.Play(game)
 }

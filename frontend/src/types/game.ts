@@ -52,7 +52,7 @@ export interface MsgSync {
 
 export interface MsgChat {
   type: "chat";
-  message: string;
+  text: string;
 }
 
 export interface GameState {

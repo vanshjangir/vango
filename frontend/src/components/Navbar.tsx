@@ -32,43 +32,35 @@ const Navbar: React.FC = () => {
     localStorage.clear();
     setLogged(false);
   };
-  
+
   const checkOngoing = async () => {
   }
 
   const reconnect = async () => {
   };
-  
+
   useEffect(() => {
     checkOngoing();
   }, []);
 
   return (
     <Box
-      color="white"
+      color="gray.100"
       fontSize="3xl"
       position="sticky"
       top="0"
       zIndex="1000"
-      bg="transparent"
+      bg="black"
+      borderColor="gray.800"
     >
       <Box maxW="6xl" mx="auto" px={{ base: 4, sm: 6, lg: 8 }}>
         <Flex justify="space-between" h={20} align="center">
           <Flex align="center">
             <Link href="/" _hover={{ textDecoration: 'none' }}>
-              <Text 
-                as="h1" 
-                fontSize={{ base: "4xl", md: "6xl" }} 
-                fontWeight="900" 
-                bgGradient="linear(to-r, #f6ad55, #ed8936, #dd6b20)"
-                bgClip="text"
-                _hover={{ 
-                  bgGradient: "linear(to-r, #ed8936, #dd6b20, #c05621)",
-                  transform: "scale(1.02)"
-                }}
-                transition="all 0.3s ease"
-                letterSpacing="tight"
-                textShadow="0 0 20px rgba(237, 137, 54, 0.3)"
+              <Text
+                as="h1"
+                fontSize={{ base: "4xl", md: "6xl" }}
+                color="white"
               >
                 VanGo
               </Text>
@@ -78,40 +70,29 @@ const Navbar: React.FC = () => {
             )}
           </Flex>
 
-          <HStack spacing={2} display={{ base: "none", md: "flex" }} align="center">
+          <HStack spacing={3} display={{ base: "none", md: "flex" }} align="center">
             {logged ? (
-              <HStack spacing={2}>
+              <HStack spacing={3}>
                 <Link
                   onClick={() => nav(`/profile/${username}`)}
-                  color="orange.400"
-                  fontWeight="600"
+                  color="gray.300"
+                  fontWeight="500"
                   fontSize="2xl"
-                  _hover={{ 
-                    textDecoration: 'none',
-                    color: "orange.100",
-                    transform: "translateY(-2px)"
-                  }}
-                  transition="all 0.3s ease"
                   cursor="pointer"
+                  _hover={{ color: "white" }}
                 >
                   {username}
                 </Link>
                 <Button
                   onClick={handleLogout}
-                  bg="linear-gradient(135deg, rgba(26, 32, 44, 0.8), rgba(45, 55, 72, 0.8))"
-                  color="white"
-                  _hover={{ 
-                    bg: "linear-gradient(135deg, rgba(45, 55, 72, 0.9), rgba(74, 85, 104, 0.9))",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)"
-                  }}
-                  rounded="xl"
-                  px={6}
-                  py={3}
-                  fontWeight="600"
-                  transition="all 0.3s ease"
-                  border="2px solid"
-                  borderColor="whiteAlpha.300"
+                  bg="gray.800"
+                  color="gray.200"
+                  border="1px solid"
+                  borderColor="gray.700"
+                  px={4}
+                  py={2}
+                  fontWeight="500"
+                  _hover={{ borderColor: "gray.600" }}
                 >
                   <FiLogOut/>
                 </Button>
@@ -121,38 +102,28 @@ const Navbar: React.FC = () => {
                 <Button
                   as={Link}
                   href="/login"
-                  bg="linear-gradient(135deg, rgba(26, 32, 44, 0.8), rgba(45, 55, 72, 0.8))"
-                  color="white"
-                  _hover={{ 
-                    bg: "linear-gradient(135deg, rgba(45, 55, 72, 0.9), rgba(74, 85, 104, 0.9))",
-                    textDecoration: "none",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)"
-                  }}
-                  rounded="xl"
-                  px={6}
-                  py={3}
-                  fontWeight="600"
-                  transition="all 0.3s ease"
+                  bg="gray.800"
+                  color="gray.200"
+                  border="1px solid"
+                  borderColor="gray.700"
+                  rounded="2px"
+                  px={5}
+                  py={2}
+                  fontWeight="500"
+                  _hover={{ borderColor: "gray.600" }}
                 >
                   Login
                 </Button>
                 <Button
                   as={Link}
                   href="/signup"
-                  bg="linear-gradient(135deg, #f6ad55, #ed8936)"
-                  color="white"
-                  _hover={{ 
-                    bg: "linear-gradient(135deg, #ed8936, #dd6b20)",
-                    textDecoration: "none",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 8px 25px rgba(246, 173, 85, 0.4)"
-                  }}
-                  rounded="xl"
-                  px={6}
-                  py={3}
-                  fontWeight="600"
-                  transition="all 0.3s ease"
+                  bg="white"
+                  color="gray.900"
+                  rounded="2px"
+                  px={5}
+                  py={2}
+                  fontWeight="500"
+                  _hover={{ bg: "gray.100" }}
                 >
                   Sign Up
                 </Button>
@@ -166,30 +137,25 @@ const Navbar: React.FC = () => {
             aria-label="Open Menu"
             display={{ md: "none" }}
             onClick={onToggle}
-            bg="linear-gradient(135deg, rgba(246, 173, 85, 0.2), rgba(237, 137, 54, 0.2))"
-            color="white"
-            _hover={{ 
-              bg: "linear-gradient(135deg, rgba(246, 173, 85, 0.3), rgba(237, 137, 54, 0.3))",
-              transform: "rotate(90deg)"
-            }}
-            transition="all 0.3s ease"
-            rounded="xl"
-            border="2px solid"
-            borderColor="whiteAlpha.300"
+            bg="gray.800"
+            color="gray.200"
+            border="1px solid"
+            borderColor="gray.700"
+            _hover={{ borderColor: "gray.600" }}
+            rounded="2px"
           />
         </Flex>
       </Box>
 
       <Collapse in={isOpen} animateOpacity>
-        <Box 
-          pb={4} 
+        <Box
+          pb={4}
           display={{ md: 'none' }}
-          bg="linear-gradient(135deg, rgba(26, 32, 44, 0.9), rgba(45, 55, 72, 0.8))"
-          backdropFilter="blur(12px)"
-          borderTop="2px solid"
-          borderColor="whiteAlpha.200"
+          bg="gray.900"
+          borderBottom="1px solid"
+          borderColor="gray.800"
         >
-          <VStack spacing={3} px={4} pt={4}>
+          <VStack spacing={2} px={4} pt={4}>
             {recon === true && (
               <Box w="full">
                 <ReconnectButton handler={reconnect} />
@@ -199,39 +165,29 @@ const Navbar: React.FC = () => {
               <>
                 <Link
                   onClick={() => nav(`/profile/${username}`)}
-                  color="orange.200"
-                  fontWeight="600"
+                  color="gray.300"
+                  fontWeight="500"
                   fontSize="lg"
-                  _hover={{ 
-                    textDecoration: 'none',
-                    color: "orange.100",
-                    transform: "translateX(8px)"
-                  }}
+                  _hover={{ color: "white" }}
                   w="full"
                   px={4}
                   py={3}
-                  rounded="lg"
-                  transition="all 0.3s ease"
                   cursor="pointer"
                 >
                   {username}
                 </Link>
                 <Button
                   onClick={handleLogout}
-                  bg="linear-gradient(135deg, rgba(26, 32, 44, 0.8), rgba(45, 55, 72, 0.8))"
-                  color="white"
-                  _hover={{ 
-                    bg: "linear-gradient(135deg, rgba(45, 55, 72, 0.9), rgba(74, 85, 104, 0.9))",
-                    transform: "translateY(-2px)"
-                  }}
-                  rounded="lg"
+                  bg="gray.800"
+                  color="gray.200"
+                  border="1px solid"
+                  borderColor="gray.700"
+                  _hover={{ borderColor: "gray.600" }}
+                  rounded="2px"
                   w="full"
                   px={4}
                   py={3}
-                  fontWeight="600"
-                  transition="all 0.3s ease"
-                  border="2px solid"
-                  borderColor="whiteAlpha.300"
+                  fontWeight="500"
                 >
                   Logout
                 </Button>
@@ -241,42 +197,30 @@ const Navbar: React.FC = () => {
                 <Button
                   as={Link}
                   href="/login"
-                  bg="linear-gradient(135deg, rgba(26, 32, 44, 0.8), rgba(45, 55, 72, 0.8))"
-                  color="white"
-                  _hover={{ 
-                    bg: "linear-gradient(135deg, rgba(45, 55, 72, 0.9), rgba(74, 85, 104, 0.9))",
-                    textDecoration: "none",
-                    transform: "translateY(-2px)"
-                  }}
-                  rounded="lg"
+                  bg="gray.800"
+                  color="gray.200"
+                  border="1px solid"
+                  borderColor="gray.700"
+                  _hover={{ borderColor: "gray.600", textDecoration: "none" }}
+                  rounded="2px"
                   w="full"
                   px={4}
                   py={3}
-                  fontWeight="600"
-                  transition="all 0.3s ease"
-                  border="2px solid"
-                  borderColor="whiteAlpha.300"
+                  fontWeight="500"
                 >
                   Login
                 </Button>
                 <Button
                   as={Link}
                   href="/signup"
-                  bg="linear-gradient(135deg, #f6ad55, #ed8936)"
-                  color="white"
-                  _hover={{ 
-                    bg: "linear-gradient(135deg, #ed8936, #dd6b20)",
-                    textDecoration: "none",
-                    transform: "translateY(-2px)"
-                  }}
-                  rounded="lg"
+                  bg="white"
+                  color="gray.900"
+                  _hover={{ bg: "gray.100", textDecoration: "none" }}
+                  rounded="2px"
                   w="full"
                   px={4}
                   py={3}
-                  fontWeight="600"
-                  transition="all 0.3s ease"
-                  border="2px solid"
-                  borderColor="orange.400"
+                  fontWeight="500"
                 >
                   Sign Up
                 </Button>

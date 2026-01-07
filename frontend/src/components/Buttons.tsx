@@ -12,22 +12,22 @@ export const PlayButton = (
       w="full"
       size="lg"
       fontSize="3xl"
-      fontWeight="bold"
+      fontWeight="600"
       h="230px"
-      bg="linear-gradient(135deg, #f6ad55, #ed8936)"
-      color="white"
+      bg="white"
+      color="gray.900"
       rounded="2px"
-      boxShadow="lg"
+      border="1px solid"
+      borderColor="gray.300"
       _hover={{
-        bg: "linear-gradient(135deg, #ed8936, #dd6b20)",
-        boxShadow: "xl",
+        bg: "gray.100",
+        borderColor: "gray.400"
       }}
     >
       {label}
     </Button>
   );
 };
-
 
 export const ReconnectButton = (
   {handler}:{
@@ -39,21 +39,18 @@ export const ReconnectButton = (
       onClick={handler}
       size="md"
       fontSize="lg"
-      fontWeight="bold"
+      fontWeight="500"
       py={2}
       marginX={2}
       h="auto"
-      bg="linear-gradient(135deg, #f6ad55, #ed8936)"
+      bg="gray.800"
       color="white"
       rounded="2px"
-      boxShadow="md"
-      border="2px solid transparent"
+      border="1px solid"
+      borderColor="gray.700"
       _hover={{
-        bg: "linear-gradient(135deg, #ed8936, #dd6b20)",
-        boxShadow: "lg",
-        borderColor: "orange.300"
+        borderColor: "gray.600"
       }}
-      transition="all 0.2s ease"
     >
       Reconnect
     </Button>

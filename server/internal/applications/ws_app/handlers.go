@@ -28,6 +28,11 @@ func (s *wsGameService) handleClientData(game *domain.Game, data []byte) (bool, 
 	switch msgType.Type {
 	case "move":
 		err = s.handleMove(game, data)
+		code := game.WinnerIfOver()
+		if code != -1 {
+			err = s.handleGameOver(game, "play", code)
+			shouldCancel = true
+		}
 
 	case "abort":
 		err = s.handleAbort(game)
