@@ -16,7 +16,7 @@ import (
 type PubsubRepo struct {
 	rdb *redis.Client
 	ctx context.Context
-	ps	*redis.PubSub
+	ps  *redis.PubSub
 }
 
 func (r *PubsubRepo) setupRedis() {
@@ -99,7 +99,7 @@ func (r *PubsubRepo) Send(game *domain.Game, msg any) error {
 	var payload domain.SpectateServicePayload
 	payload.GameData = msg
 	payload.GameId = game.Id
-	
+
 	data, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("Send: Marshal: %v", err)
@@ -129,12 +129,12 @@ func (r *PubsubRepo) Unsubscribe(name string) error {
 }
 
 func (r *PubsubRepo) Receive(msgChan chan string) {
-    defer func() {
-        if recover() != nil {
-            log.Println("msgChan closed")
-        }
-    }()
-	
+	defer func() {
+		if recover() != nil {
+			log.Println("msgChan closed")
+		}
+	}()
+
 	ch := r.ps.Channel()
 	for msg := range ch {
 		msgChan <- msg.Payload

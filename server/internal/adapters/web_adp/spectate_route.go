@@ -6,6 +6,6 @@ import (
 )
 
 func (gh *GinHandler) spectate(ctx *gin.Context) {
-	wsUrl := util_app.Pick();
-	ctx.JSON(200, gin.H{"wsurl": wsUrl});
+	wsUrl := util_app.Pick()
+	ctx.JSON(200, gin.H{"wsurl": wsUrl})
 }

@@ -8,7 +8,6 @@ import (
 
 type UserModel struct {
 	Username      string `gorm:"primaryKey"`
-	Password      string
 	Email         string
 	Rating        int
 	Highestrating int

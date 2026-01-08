@@ -8,19 +8,19 @@ import (
 )
 
 type wsGameService struct {
-	pr      ports.PubSubRepository
-	gr      ports.GameRepository
-	ur      ports.UserRepository
-	mu		*sync.Mutex
-	gameMap map[int]*domain.Game
+	pr            ports.PubSubRepository
+	gr            ports.GameRepository
+	ur            ports.UserRepository
+	mu            *sync.Mutex
+	gameMap       map[int]*domain.Game
 	playerGameMap map[string]*domain.Game
-	repoMap map[string]ports.WsGameRepository
+	repoMap       map[string]ports.WsGameRepository
 }
 
 func safedelete[K comparable, V any](mu *sync.Mutex, m map[K]V, key K) {
-    mu.Lock()
-    delete(m, key)
-    mu.Unlock()
+	mu.Lock()
+	delete(m, key)
+	mu.Unlock()
 }
 
 func NewWsGameService(
@@ -30,9 +30,9 @@ func NewWsGameService(
 ) ports.WsGameService {
 	return &wsGameService{
 		pr: pr, gr: gr, ur: ur,
-		gameMap: make(map[int]*domain.Game),
+		gameMap:       make(map[int]*domain.Game),
 		playerGameMap: make(map[string]*domain.Game),
-		repoMap: make(map[string]ports.WsGameRepository),
-		mu: new(sync.Mutex),
+		repoMap:       make(map[string]ports.WsGameRepository),
+		mu:            new(sync.Mutex),
 	}
 }

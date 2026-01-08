@@ -11,14 +11,14 @@ type WsHandler struct {
 	us ports.UserService
 	gs ports.GameService
 	ws ports.WsGameService
-    ss ports.SpectateService
+	ss ports.SpectateService
 }
 
 func NewWsHandler(
 	us ports.UserService,
 	gs ports.GameService,
 	ws ports.WsGameService,
-    ss ports.SpectateService,
+	ss ports.SpectateService,
 ) *WsHandler {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{

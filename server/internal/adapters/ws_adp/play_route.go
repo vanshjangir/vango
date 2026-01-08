@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func getUpgrader (ctx *gin.Context) (websocket.Upgrader, error) {
+func getUpgrader(ctx *gin.Context) (websocket.Upgrader, error) {
 	var upgrader websocket.Upgrader
 	protocolHeaderItf, exists := ctx.Get("protocolHeader")
 	if !exists {
@@ -39,7 +39,7 @@ func (wsh *WsHandler) startNewGame(
 		c.Close()
 		return
 	}
-	
+
 	go wsh.ws.Play(game)
 }
 
@@ -55,10 +55,10 @@ func (wsh *WsHandler) reconnectExistingGame(
 		c.Close()
 		return
 	}
-	
+
 	game.IsOnline = true
 	*game.ReconnectChan <- true
-	
+
 	err = wsh.ws.SendStartConfirmation(game)
 	if err != nil {
 		log.Println("reconnectExistingGame: SendStartConfirmation:", username, err)
@@ -66,7 +66,7 @@ func (wsh *WsHandler) reconnectExistingGame(
 		c.Close()
 		return
 	}
-	
+
 	log.Printf("Player %v reconnected\n", username)
 }
 
@@ -77,13 +77,13 @@ func (wsh *WsHandler) play(ctx *gin.Context) {
 		ctx.JSON(500, gin.H{"error": "Internal server error"})
 		return
 	}
-	
+
 	upgrader, err := getUpgrader(ctx)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Could not able to get upgrader"})
 		return
 	}
-	
+
 	username := usernameItf.(string)
 	w, r := ctx.Writer, ctx.Request
 	c, err := upgrader.Upgrade(w, r, nil)
@@ -93,9 +93,9 @@ func (wsh *WsHandler) play(ctx *gin.Context) {
 		c.Close()
 		return
 	}
-	
+
 	wsGameRepo := NewWebsocketGameRepo(c)
-	
+
 	if wsh.ws.GameExists(username) {
 		wsh.reconnectExistingGame(username, wsGameRepo, c)
 	} else {

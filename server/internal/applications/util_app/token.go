@@ -55,12 +55,12 @@ func VerifyGoogleToken(token string) (*oauth2.Tokeninfo, error) {
 		option.WithAPIKey(os.Getenv("GOOGLE_CLIENT_ID")),
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("VerifyGoogleToken: NewService: %v", err)
 	}
 
 	tokenInfo, err := oauth2Service.Tokeninfo().IdToken(token).Do()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("VerifyGoogleToken: Tokeninfo: %v", err)
 	}
 
 	return tokenInfo, nil

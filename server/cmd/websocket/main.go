@@ -31,7 +31,7 @@ func main() {
 
 	wsHandler := ws_adp.NewWsHandler(userService, gameService, wsGameService, spectateSerivce)
 	wsHandler.RegisterRoutes()
-	
+
 	spectateSerivce.Start()
 	wsHandler.Run()
 

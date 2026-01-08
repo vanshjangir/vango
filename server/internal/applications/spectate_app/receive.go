@@ -41,7 +41,7 @@ func (s *spectateService) SendSyncState(blackGame, whiteGame *domain.Game, repo 
 	syncState.WhiteRemTime = whiteGame.GetRemainingTime()
 	syncState.State, _ = blackGame.State.Board.Encode()
 	syncState.History = blackGame.State.History
-	
+
 	data, err := json.Marshal(syncState)
 	if err != nil {
 		log.Println("SendToSpectators: Marshal:", err)
@@ -56,7 +56,7 @@ func (s *spectateService) SendSyncState(blackGame, whiteGame *domain.Game, repo 
 func (s *spectateService) ReceiveGamesData() {
 	go s.pr.Receive(s.msgChan)
 	for {
-		msg := <- s.msgChan
+		msg := <-s.msgChan
 		var payload domain.SpectateServicePayload
 		err := json.Unmarshal([]byte(msg), &payload)
 		if err != nil {

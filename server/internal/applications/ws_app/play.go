@@ -99,7 +99,7 @@ func (s *wsGameService) checkTimer(game *domain.Game) {
 			return
 		default:
 			if game.CheckTimeout() {
-				err := s.handleGameOver(game, "timeout", 1 - game.Color)
+				err := s.handleGameOver(game, "timeout", 1-game.Color)
 				if err != nil {
 					log.Println("checkTimer: handleGameover:", err)
 				}
@@ -146,7 +146,7 @@ func (s *wsGameService) waitForOp(game *domain.Game) {
 			if err != nil {
 				log.Println("Error sending start confirmation:", err)
 				game.CloseChan <- domain.GameCloseStatus{
-					Code: domain.OP_INTERNAL_ERROR,
+					Code:           domain.OP_INTERNAL_ERROR,
 					ShouldSendToOp: false,
 				}
 			}
@@ -154,7 +154,7 @@ func (s *wsGameService) waitForOp(game *domain.Game) {
 		}
 		if limit == 0 {
 			game.CloseChan <- domain.GameCloseStatus{
-				Code: domain.OP_INTERNAL_ERROR,
+				Code:           domain.OP_INTERNAL_ERROR,
 				ShouldSendToOp: false,
 			}
 			break
@@ -187,8 +187,7 @@ func (s *wsGameService) Play(game *domain.Game) {
 		log.Println("Closing game...", out.Code)
 
 		if out.Code == domain.OP_INTERNAL_ERROR {
-			if err := s.handleGameOverWhenError(game, "disconnection", game.Color);
-			err != nil {
+			if err := s.handleGameOverWhenError(game, "disconnection", game.Color); err != nil {
 				log.Println("domain.INTERNAL_ERROR: ", err)
 			}
 		}
@@ -216,7 +215,7 @@ func (s *wsGameService) Play(game *domain.Game) {
 				}
 			}
 		}
-		
+
 		break
 	}
 }

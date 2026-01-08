@@ -41,11 +41,12 @@ func (r *PostgresGameRepo) Review(gameId int) (domain.GameReview, error) {
 	}
 
 	return domain.GameReview{
-		Id:        review.Gameid,
+		Gameid:    review.Gameid,
 		BlackName: review.Black,
 		WhiteName: review.White,
 		Winner:    review.Winner,
 		Moves:     review.Moves,
+		CreatedAt: review.CreatedAt,
 	}, nil
 }
 
@@ -61,4 +62,29 @@ func (r *PostgresGameRepo) CreateNewGame(
 	}
 	tx.Commit()
 	return game.Gameid, nil
+}
+
+func (r *PostgresGameRepo) RecentGames(
+	username string, howmany int,
+) ([]domain.GameReview, error) {
+
+	var games []GameModel
+	result := r.db.Where("white = ? OR black = ?", username, username).
+		Order("created_at DESC").
+		Limit(howmany).
+		Find(&games)
+	if result.Error != nil {
+		return []domain.GameReview{}, fmt.Errorf("RecentGames %v", result.Error)
+	}
+
+	reviews := make([]domain.GameReview, len(games))
+	for i, g := range games {
+		reviews[i].Gameid = g.Gameid
+		reviews[i].BlackName = g.Black
+		reviews[i].WhiteName = g.White
+		reviews[i].Winner = g.Winner
+		reviews[i].CreatedAt = g.CreatedAt
+		reviews[i].Moves = g.Moves
+	}
+	return reviews, nil
 }

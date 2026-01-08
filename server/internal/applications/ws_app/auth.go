@@ -11,7 +11,7 @@ func (s *wsGameService) Auth(authHeader string, us ports.UserService) (string, e
 	tokenData := strings.Split(authHeader, " ")
 	tokenType := tokenData[0]
 	token := tokenData[1]
-	
+
 	switch tokenType {
 	case "google":
 		return us.AuthGoogle(token)

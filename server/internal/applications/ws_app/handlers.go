@@ -16,7 +16,7 @@ func (s *wsGameService) GetGameFromId(gameId int) *domain.Game {
 func (s *wsGameService) GetGameFromPlayerName(name string) *domain.Game {
 	return s.playerGameMap[name]
 }
- 
+
 func (s *wsGameService) handleClientData(game *domain.Game, data []byte) (bool, error) {
 	shouldCancel := false
 	var msgType domain.MsgType
@@ -77,7 +77,7 @@ func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
 
 	if game.State.Turn != game.Color {
 		msgMoveStatus.Code = "INVALID_TURN"
-		err := s.SendJSON(game, msgMoveStatus);
+		err := s.SendJSON(game, msgMoveStatus)
 		if err != nil {
 			return fmt.Errorf("handleMove: Send invalid turn: %v", err)
 		}
@@ -108,7 +108,7 @@ func (s *wsGameService) handleMove(game *domain.Game, data []byte) error {
 	msgMove.BlackRemTime = msgMoveStatus.BlackRemTime
 
 	s.SendToOpLocally(game, msgMove)
-	
+
 	err = s.SendJSON(game, msgMoveStatus)
 	if err != nil {
 		return fmt.Errorf("handleMove: sending msgMoveStatus: %v", err)
@@ -195,7 +195,7 @@ func (s *wsGameService) handleSync(game *domain.Game) error {
 	if err != nil {
 		return fmt.Errorf("handleSync: Encode: %v", err)
 	}
-	
+
 	if game.Color == domain.WhiteColor {
 		msgSync.WhiteName = game.PName
 		msgSync.BlackName = game.OpName

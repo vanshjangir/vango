@@ -5,6 +5,7 @@ import "github.com/vanshjangir/vango/server/internal/domain"
 type GameService interface {
 	SaveGame(g *domain.Game) error
 	Review(gameid int) (domain.GameReview, error)
+	RecentGames(username string, howmany int) ([]domain.GameReview, error)
 }
 
 type UserService interface {
@@ -14,6 +15,7 @@ type UserService interface {
 	AuthGoogle(token string) (string, error)
 	AuthGuest(token string) (string, error)
 	GetUser(username string) (domain.User, error)
+	GetUserProfile(username string) (domain.UserProfile, error)
 }
 
 type WsGameService interface {

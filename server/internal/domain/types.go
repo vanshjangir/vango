@@ -4,10 +4,27 @@ import "time"
 
 type User struct {
 	Username      string
-	Password      string
 	Email         string
 	Rating        int
 	Highestrating int
+}
+
+type RecentGames struct {
+	Gameid    int       `json:"gameid"`
+	Opponent  string    `json:"opponent"`
+	Result    string    `json:"result"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type UserProfile struct {
+	Username      string        `json:"username"`
+	Email         string        `json:"email"`
+	Rating        int           `json:"rating"`
+	Highestrating int           `json:"highestrating"`
+	Wins          int           `json:"wins"`
+	Losses        int           `json:"losses"`
+	GamesPlayed   int           `json:"gamesPlayed"`
+	RecentGames   []RecentGames `json:"recentGames"`
 }
 
 type Player struct {
@@ -30,7 +47,7 @@ type GameDataForPlayer struct {
 }
 
 type SpectateServicePayload struct {
-	GameId int `json:"gameid"`
+	GameId   int `json:"gameid"`
 	GameData any `json:"gamedata"`
 }
 
@@ -50,20 +67,20 @@ type MsgStart struct {
 }
 
 type MsgMove struct {
-	Type       string `json:"type"`
-	Move       string `json:"move"`
-	State      string `json:"state"`
+	Type         string `json:"type"`
+	Move         string `json:"move"`
+	State        string `json:"state"`
 	BlackRemTime int    `json:"blackRemTime"`
 	WhiteRemTime int    `json:"whiteRemTime"`
 }
 
 type MsgMoveStatus struct {
-	Type       string `json:"type"`
-	Move       string `json:"move"`
+	Type         string `json:"type"`
+	Move         string `json:"move"`
 	BlackRemTime int    `json:"blackRemTime"`
 	WhiteRemTime int    `json:"whiteRemTime"`
-	State      string `json:"state"`
-	Code       string `json:"code"`
+	State        string `json:"state"`
+	Code         string `json:"code"`
 }
 
 type MsgAbort struct {
@@ -82,12 +99,12 @@ type MsgChat struct {
 }
 
 type MsgSyncState struct {
-	Type string `json:"type"`
-	Gameid int `json:"gameid"`
-	BlackName string `json:"blackname"`
-	WhiteName string `json:"whitename"`
-	State string `json:"state"`
-	History StringArray `json:"history"`
-	BlackRemTime int `json:"blackRemTime"`
-	WhiteRemTime int `json:"whiteRemTime"`
+	Type         string      `json:"type"`
+	Gameid       int         `json:"gameid"`
+	BlackName    string      `json:"blackname"`
+	WhiteName    string      `json:"whitename"`
+	State        string      `json:"state"`
+	History      StringArray `json:"history"`
+	BlackRemTime int         `json:"blackRemTime"`
+	WhiteRemTime int         `json:"whiteRemTime"`
 }

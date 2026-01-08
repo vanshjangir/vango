@@ -1,6 +1,10 @@
 package web_adp
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+
+	"github.com/gin-gonic/gin"
+)
 
 type LoginRequestPayload struct {
 	Type        string `json:"type"`
@@ -19,6 +23,7 @@ func (gh *GinHandler) login(ctx *gin.Context) {
 		username, err := gh.us.LoginByGoogle(req.Credentials)
 		if err != nil {
 			ctx.JSON(403, gin.H{"error": "Login failed"})
+			log.Println("Google Auth failed:", err)
 		} else {
 			ctx.JSON(200, gin.H{
 				"message":  "Login successful",
@@ -31,6 +36,7 @@ func (gh *GinHandler) login(ctx *gin.Context) {
 		username, token, err := gh.us.LoginAsGuest(req.Credentials)
 		if err != nil {
 			ctx.JSON(403, gin.H{"error": "Login failed"})
+			log.Println("Guest Auth failed:", err)
 		} else {
 			ctx.JSON(200, gin.H{
 				"message":  "Login successful",

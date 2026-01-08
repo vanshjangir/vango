@@ -8,6 +8,7 @@ type GameRepository interface {
 	SaveGame(g *domain.Game) error
 	Review(gameid int) (domain.GameReview, error)
 	CreateNewGame(blackName, whiteName string) (int, error)
+	RecentGames(username string, howmany int) ([]domain.GameReview, error)
 }
 
 type UserRepository interface {

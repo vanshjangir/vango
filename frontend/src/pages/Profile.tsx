@@ -24,9 +24,7 @@ import {
 const Profile = () => {
   const nav = useNavigate();
   const { username } = useParams();
-  const BACKEND_URL = import.meta.env.PROD ?
-    import.meta.env.VITE_HTTPS_URL :
-    import.meta.env.VITE_HTTP_URL;
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const [userData, setUserData] = useState<UserProfileData | null>(null);
   const token = localStorage.getItem('token') || "";
   const [textAreaVis, setTextAreaVis] = useState<boolean>(false);
@@ -71,61 +69,35 @@ const Profile = () => {
     getData();
   }, []);
 
-if (!userData)
-    return (
-      <Flex 
-        h="100vh" 
-        bg="linear-gradient(135deg, #1a202c 0%, #2d3748 25%, #4a5568 50%, #2d3748 75%, #1a202c 100%)"
-        flexDir="column" 
-        color="white"
-        position="relative"
-        overflow="hidden"
-      >
-        {/* Background pattern for loading */}
-        <Box
-          position="absolute"
-          top="0"
-          left="0"
-          right="0"
-          bottom="0"
-          opacity="0.05"
-          backgroundImage="radial-gradient(circle at 25% 25%, #f6ad55 0%, transparent 50%), radial-gradient(circle at 75% 75%, #ed8936 0%, transparent 50%)"
-          backgroundSize="100px 100px"
-        />
-        
-        <Flex alignItems="center" justifyContent="center" h="100vh">
-          <Box textAlign="center">
-            <Box
-              w="60px"
-              h="60px"
-              border="4px solid transparent"
-              borderTopColor="#f6ad55"
-              borderRadius="full"
-              animation="spin 1s linear infinite"
-              mx="auto"
-              mb={4}
-            />
-            <Text 
-              fontSize="xl" 
-              fontWeight="600"
-              bgGradient="linear(to-r, #f6ad55, #ed8936)"
-              bgClip="text"
-            >
-              Loading...
-            </Text>
-          </Box>
-        </Flex>
+if (!userData) {
+  return (
+    <Flex 
+      h="100vh" 
+      bg="black"
+      flexDir="column" 
+      color="white"
+    >
+      <Flex alignItems="center" justifyContent="center" h="100vh">
+        <Box textAlign="center">
+          <Text 
+            fontSize="xl" 
+            fontWeight="500"
+            color="gray.400"
+          >
+            Loading...
+          </Text>
+        </Box>
       </Flex>
-    );
+    </Flex>
+  );
+}
 
   return (
     <Flex 
       minH="100vh" 
-      bg="linear-gradient(135deg, #1a202c 0%, #2d3748 25%, #4a5568 50%, #2d3748 75%, #1a202c 100%)"
+      bg="black"
       flexDir="column" 
       color="white"
-      position="relative"
-      overflow="hidden"
     >
       <Navbar />
       <Box 
@@ -134,32 +106,16 @@ if (!userData)
         w="full" 
         px={{ base: 4, sm: 6, lg: 8 }} 
         py={8}
-        position="relative"
-        zIndex={1}
       >
         {/* Profile Header */}
         <Box
-          bg="linear-gradient(135deg, rgba(26, 32, 44, 0.9), rgba(45, 55, 72, 0.8))"
-          backdropFilter="blur(20px)"
-          rounded="3xl"
+          bg="gray.900"
+          borderRadius="2px"
           p={{ base: 6, md: 8 }}
-          border="2px solid"
-          borderColor="whiteAlpha.200"
-          boxShadow="0 25px 50px rgba(0, 0, 0, 0.4)"
+          border="1px solid"
+          borderColor="gray.800"
           mb={8}
-          position="relative"
-          overflow="hidden"
         >
-          {/* Gradient accent line */}
-          <Box
-            position="absolute"
-            top="0"
-            left="0"
-            right="0"
-            h="4px"
-            bg="linear-gradient(90deg, #f6ad55, #ed8936, #dd6b20, #c05621)"
-          />
-          
           <Flex alignItems="center" gap="6" mb="8">
             <Box>
               <Flex alignItems="center" gap={4}>
@@ -168,26 +124,21 @@ if (!userData)
                     <Heading 
                       as="h1" 
                       size="2xl" 
-                      fontWeight="900"
-                      bgGradient="linear(to-r, #f6ad55, #ed8936, #dd6b20)"
-                      bgClip="text"
-                      textShadow="0 0 20px rgba(237, 137, 54, 0.3)"
+                      fontWeight="600"
+                      color="white"
                     >
                       {userData.name || username}
                     </Heading>
                     <Button
                       onClick={onButtonClick}
-                      bg="linear-gradient(135deg, rgba(246, 173, 85, 0.2), rgba(237, 137, 54, 0.2))"
+                      bg="gray.800"
                       _hover={{
-                        bg: "linear-gradient(135deg, rgba(246, 173, 85, 0.3), rgba(237, 137, 54, 0.3))",
-                        transform: "scale(1.1)",
-                        boxShadow: "0 8px 25px rgba(246, 173, 85, 0.25)"
+                        bg: "gray.700",
                       }}
-                      rounded="xl"
+                      borderRadius="2px"
                       p={3}
-                      transition="all 0.3s ease"
-                      border="2px solid"
-                      borderColor="whiteAlpha.300"
+                      border="1px solid"
+                      borderColor="gray.700"
                     >
                       <Image src="/editpencil.png" width={"24px"} />
                     </Button>
@@ -195,12 +146,11 @@ if (!userData)
                 ) : (
                     <>
                       <Input
-                        bg="linear-gradient(135deg, rgba(26, 32, 44, 0.8), rgba(45, 55, 72, 0.8))"
-                        border="2px solid"
-                        borderColor="whiteAlpha.300"
+                        bg="gray.800"
+                        border="1px solid"
+                        borderColor="gray.700"
                         _focus={{
-                          borderColor: "orange.400",
-                          boxShadow: "0 0 0 1px #ed8936, 0 0 20px rgba(237, 137, 54, 0.3)"
+                          borderColor: "gray.600",
                         }}
                         placeholder="username"
                         autoFocus
@@ -208,26 +158,24 @@ if (!userData)
                         onKeyDown={(e) => {
                           if (e.key === "Enter") changeUsername();
                         }}
-                        rounded="xl"
+                        borderRadius="2px"
                         fontSize="lg"
                         py={3}
                         color="white"
-                        _placeholder={{ color: "gray.400" }}
+                        _placeholder={{ color: "gray.500" }}
                       />
                       <Button
                         onClick={changeUsername}
-                        bg="linear-gradient(135deg, #22c55e, #16a34a)"
+                        bg="green.600"
+                        color="white"
                         _hover={{
-                          bg: "linear-gradient(135deg, #16a34a, #15803d)",
-                          transform: "scale(1.1)",
-                          boxShadow: "0 8px 25px rgba(34, 197, 94, 0.4)"
+                          bg: "green.500",
                         }}
                         ml="3"
-                        rounded="xl"
+                        borderRadius="2px"
                         p={3}
-                        transition="all 0.3s ease"
-                        border="2px solid"
-                        borderColor="green.400"
+                        border="1px solid"
+                        borderColor="green.500"
                       >
                         <Image src="/tick.png" w="24px" />
                       </Button>
@@ -236,8 +184,8 @@ if (!userData)
               </Flex>
               <Text 
                 fontSize={"2xl"} 
-                color="orange.200"
-                fontWeight="600"
+                color="gray.300"
+                fontWeight="500"
                 mt={3}
               >
                 Rating: {userData.rating}
@@ -251,11 +199,9 @@ if (!userData)
           <Heading 
             as="h2" 
             size="xl" 
-            fontWeight="900" 
+            fontWeight="600" 
             mb="6"
-            bgGradient="linear(to-r, #f6ad55, #ed8936, #dd6b20)"
-            bgClip="text"
-            textShadow="0 0 20px rgba(237, 137, 54, 0.3)"
+            color="white"
           >
             Statistics
           </Heading>
@@ -265,114 +211,73 @@ if (!userData)
           >
             <Box 
               textAlign="center" 
-              bg="linear-gradient(135deg, rgba(26, 32, 44, 0.8), rgba(45, 55, 72, 0.8))"
-              backdropFilter="blur(12px)"
+              bg="gray.900"
               p="6" 
-              rounded="2xl"
-              border="2px solid"
-              borderColor="whiteAlpha.200"
-              transition="all 0.3s ease"
-              _hover={{
-                transform: "translateY(-5px)",
-                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.4)",
-                borderColor: "whiteAlpha.300"
-              }}
+              borderRadius="2px"
+              border="1px solid"
+              borderColor="gray.800"
             >
-              <Text display="block" fontSize="3xl" fontWeight="900" color="white">
+              <Text display="block" fontSize="3xl" fontWeight="600" color="white">
                 {userData.gamesPlayed}
               </Text>
-              <Text color="gray.300" fontWeight="600">Games Played</Text>
+              <Text color="gray.400" fontWeight="500" mt={2}>Games Played</Text>
             </Box>
             <Box 
               textAlign="center" 
-              bg="linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.2))" 
-              backdropFilter="blur(12px)"
+              bg="gray.900"
               p="6" 
-              rounded="2xl"
-              border="2px solid"
-              borderColor="green.400"
-              transition="all 0.3s ease"
-              _hover={{
-                transform: "translateY(-5px)",
-                boxShadow: "0 20px 40px rgba(34, 197, 94, 0.3)"
-              }}
+              borderRadius="2px"
+              border="1px solid"
+              borderColor="green.600"
             >
-              <Text display="block" fontSize="3xl" fontWeight="900" color="white">
+              <Text display="block" fontSize="3xl" fontWeight="600" color="white">
                 {userData.wins}
               </Text>
-              <Text color="green.200" fontWeight="600">Wins</Text>
+              <Text color="gray.400" fontWeight="500" mt={2}>Wins</Text>
             </Box>
             <Box 
               textAlign="center" 
-              bg="linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2))" 
-              backdropFilter="blur(12px)"
+              bg="gray.900"
               p="6" 
-              rounded="2xl"
-              border="2px solid"
-              borderColor="red.400"
-              transition="all 0.3s ease"
-              _hover={{
-                transform: "translateY(-5px)",
-                boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)"
-              }}
+              borderRadius="2px"
+              border="1px solid"
+              borderColor="red.600"
             >
-              <Text display="block" fontSize="3xl" fontWeight="900" color="white">
+              <Text display="block" fontSize="3xl" fontWeight="600" color="white">
                 {userData.losses}
               </Text>
-              <Text color="red.200" fontWeight="600">Losses</Text>
+              <Text color="gray.400" fontWeight="500" mt={2}>Losses</Text>
             </Box>
             <Box 
               textAlign="center" 
-              bg="linear-gradient(135deg, rgba(246, 173, 85, 0.2), rgba(237, 137, 54, 0.2))" 
-              backdropFilter="blur(12px)"
+              bg="gray.900"
               p="6" 
-              rounded="2xl"
-              border="2px solid"
-              borderColor="orange.400"
-              transition="all 0.3s ease"
-              _hover={{
-                transform: "translateY(-5px)",
-                boxShadow: "0 20px 40px rgba(246, 173, 85, 0.4)"
-              }}
+              borderRadius="2px"
+              border="1px solid"
+              borderColor="gray.800"
             >
-              <Text display="block" fontSize="3xl" fontWeight="900" color="white">
-                {userData.highestRating}
+              <Text display="block" fontSize="3xl" fontWeight="600" color="white">
+                {userData.highestrating}
               </Text>
-              <Text color="orange.200" fontWeight="600">Highest Rating</Text>
+              <Text color="gray.400" fontWeight="500" mt={2}>Highest Rating</Text>
             </Box>
           </Grid>
         </Box>
 
         {/* Recent Games Section */}
         <Box
-          bg="linear-gradient(135deg, rgba(26, 32, 44, 0.9), rgba(45, 55, 72, 0.8))"
-          backdropFilter="blur(20px)"
-          rounded="3xl"
+          bg="gray.900"
+          borderRadius="2px"
           p={{ base: 6, md: 8 }}
-          border="2px solid"
-          borderColor="whiteAlpha.200"
-          boxShadow="0 25px 50px rgba(0, 0, 0, 0.4)"
-          position="relative"
-          overflow="hidden"
+          border="1px solid"
+          borderColor="gray.800"
         >
-          {/* Gradient accent line */}
-          <Box
-            position="absolute"
-            top="0"
-            left="0"
-            right="0"
-            h="4px"
-            bg="linear-gradient(90deg, #f6ad55, #ed8936, #dd6b20, #c05621)"
-          />
-          
           <Heading 
             as="h2" 
             size="xl" 
-            fontWeight="900" 
+            fontWeight="600" 
             mb="6"
-            bgGradient="linear(to-r, #f6ad55, #ed8936, #dd6b20)"
-            bgClip="text"
-            textShadow="0 0 20px rgba(237, 137, 54, 0.3)"
+            color="white"
           >
             Recent Games
           </Heading>
@@ -382,77 +287,78 @@ if (!userData)
                 <Thead>
                   <Tr>
                     <Th 
-                      fontSize={"xl"} 
-                      color="orange.200" 
-                      fontWeight="700"
+                      fontSize={"md"} 
+                      color="gray.400" 
+                      fontWeight="500"
                       textTransform="none"
                       letterSpacing="normal"
+                      borderColor="gray.800"
                     >
                       Result
                     </Th>
                     <Th 
-                      fontSize={"xl"} 
-                      color="orange.200" 
-                      fontWeight="700"
+                      fontSize={"md"} 
+                      color="gray.400" 
+                      fontWeight="500"
                       textTransform="none"
                       letterSpacing="normal"
+                      borderColor="gray.800"
                     >
                       Opponent
                     </Th>
                     <Th 
-                      fontSize={"xl"} 
-                      color="orange.200" 
-                      fontWeight="700"
+                      fontSize={"md"} 
+                      color="gray.400" 
+                      fontWeight="500"
                       textTransform="none"
                       letterSpacing="normal"
+                      borderColor="gray.800"
                     >
                       Date
                     </Th>
                     <Th 
-                      fontSize={"xl"} 
-                      color="orange.200" 
+                      fontSize={"md"} 
+                      color="gray.400" 
                       textAlign="center"
-                      fontWeight="700"
+                      fontWeight="500"
                       textTransform="none"
                       letterSpacing="normal"
+                      borderColor="gray.800"
                     >
                       Review
                     </Th>
                   </Tr>
                 </Thead>
-                <Tbody fontSize={"lg"}>
+                <Tbody fontSize={"md"}>
                   {userData.recentGames.map((game, index) => (
                     <Tr 
                       key={index}
+                      borderColor="gray.800"
                       _hover={{
-                        bg: "whiteAlpha.100",
+                        bg: "gray.800",
                       }}
-                      transition="all 0.2s ease"
                     >
                       <Td 
-                        style={{
-                          color: game.result === "Lost" ? "#ef4444" : "#22c55e",
-                          fontWeight: "600"
-                        }}
+                        color={game.result === "Lost" ? "red.400" : "green.400"}
+                        fontWeight="500"
+                        borderColor="gray.800"
                       >
                         {game.result}
                       </Td>
-                      <Td>
+                      <Td borderColor="gray.800">
                         <Link
                           href={"/profile/" + game.opponent}
-                          color="orange.200"
+                          color="gray.300"
                           _hover={{ 
                             textDecoration: "none",
-                            color: "orange.100",
-                            transform: "translateX(4px)"
+                            color: "white",
                           }}
                           fontWeight="500"
-                          transition="all 0.2s ease"
                         >
                           {game.opponent}
                         </Link>
                       </Td>
-                      <Td color="gray.300" fontWeight="500">
+                      <Td color="gray.400" fontWeight="500" borderColor="gray.800">
                         {
                           new Date(game.created_at.split(" ")[0])
                           .toLocaleDateString('en-US', {
@@ -466,26 +372,23 @@ if (!userData)
                           })
                         }
                       </Td>
-                      <Td textAlign="center">
+                      <Td textAlign="center" borderColor="gray.800">
                         <Button
                           onClick={() => {
                             nav(`/review/${game.gameid}`);
                           }}
                           size="sm"
-                          bg="linear-gradient(135deg, #f6ad55, #ed8936)"
+                          bg="gray.800"
                           color="white"
                           _hover={{ 
-                            bg: "linear-gradient(135deg, #ed8936, #dd6b20)",
-                            transform: "translateY(-2px)",
-                            boxShadow: "0 8px 25px rgba(246, 173, 85, 0.4)"
+                            bg: "gray.700",
                           }}
-                          rounded="lg"
+                          borderRadius="2px"
                           px={4}
                           py={2}
-                          fontWeight="600"
-                          transition="all 0.3s ease"
+                          fontWeight="500"
                           border="1px solid"
-                          borderColor="orange.400"
+                          borderColor="gray.700"
                         >
                           Review
                         </Button>
@@ -497,8 +400,8 @@ if (!userData)
             </TableContainer>
           ) : (
               <Text 
-                color="gray.400" 
-                fontSize="lg" 
+                color="gray.500" 
+                fontSize="md" 
                 textAlign="center"
                 py={8}
                 fontWeight="500"

@@ -15,7 +15,7 @@ func (wsh *WsHandler) spectate(ctx *gin.Context) {
 		ctx.JSON(500, gin.H{"error": "Could not able to get upgrader"})
 		return
 	}
-	
+
 	w, r := ctx.Writer, ctx.Request
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -38,7 +38,7 @@ func (wsh *WsHandler) spectate(ctx *gin.Context) {
 		c.Close()
 		return
 	}
-	
+
 	wsGameRepo := NewWebsocketGameRepo(c)
 	wsh.ss.AddSpectator(game, wsGameRepo)
 

@@ -75,7 +75,7 @@ export interface UserProfileData {
   gamesPlayed: number;
   wins: number;
   losses: number;
-  highestRating: number;
+  highestrating: number;
   recentGames: {
     gameid: string;
     opponent: string;

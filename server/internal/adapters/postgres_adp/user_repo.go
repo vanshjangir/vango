@@ -21,7 +21,6 @@ func (r *PostgresUserRepo) FindByUsername(username string) (domain.User, error) 
 	return domain.User{
 		Username:      user.Username,
 		Email:         user.Email,
-		Password:      user.Password,
 		Rating:        user.Rating,
 		Highestrating: user.Highestrating,
 	}, nil
@@ -35,7 +34,6 @@ func (r *PostgresUserRepo) FindByEmail(email string) (domain.User, error) {
 	return domain.User{
 		Username:      user.Username,
 		Email:         user.Email,
-		Password:      user.Password,
 		Rating:        user.Rating,
 		Highestrating: user.Highestrating,
 	}, nil
@@ -46,7 +44,6 @@ func (r *PostgresUserRepo) InsertUser(user domain.User) error {
 	err := tx.Create(&UserModel{
 		Username:      user.Username,
 		Email:         user.Email,
-		Password:      user.Password,
 		Rating:        user.Rating,
 		Highestrating: user.Highestrating,
 	}).Error

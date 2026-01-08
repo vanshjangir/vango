@@ -45,15 +45,15 @@ type GameState struct {
 }
 
 type Game struct {
-	Id            int
-	RemTime       int
+	Id             int
+	RemTime        int
 	LastStoredTime time.Time
-	Color         int
-	PName         string
-	OpName        string
-	LocalRecv     chan any
-	Winner        int
-	WonBy         string
+	Color          int
+	PName          string
+	OpName         string
+	LocalRecv      chan any
+	Winner         int
+	WonBy          string
 
 	CloseChan     chan GameCloseStatus
 	ReconnectChan *chan bool
@@ -64,11 +64,12 @@ type Game struct {
 }
 
 type GameReview struct {
-	Id        int
+	Gameid    int
 	BlackName string
 	WhiteName string
 	Winner    int
 	Moves     StringArray
+	CreatedAt time.Time
 }
 
 type GameCloseStatus struct {
@@ -115,7 +116,7 @@ func (g *Game) MakeMove(move string) (string, error) {
 		encode, err := g.State.Board.Encode()
 		return encode, err
 	}
-	
+
 	col := int(move[0] - 'a')
 	row, err := strconv.Atoi(move[1:])
 	if err != nil {
