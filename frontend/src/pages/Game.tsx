@@ -277,7 +277,8 @@ const Game: React.FC = () => {
       <Navbar />
       <Flex 
         id="game-container" 
-        w="100%" 
+        maxW="6xl"
+        mx="auto"
         flexDirection={{ base: "column", lg: "row", sm: "column" }} 
         alignItems={{ base: "center", lg: "flex-start" }} 
         justifyContent="center"

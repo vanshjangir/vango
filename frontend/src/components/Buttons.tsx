@@ -13,11 +13,10 @@ export const PlayButton = (
       size="lg"
       fontSize="3xl"
       fontWeight="600"
-      h="230px"
+      h="200px"
       bg="white"
       color="gray.900"
       rounded="2px"
-      border="1px solid"
       borderColor="gray.300"
       _hover={{
         bg: "gray.100",

@@ -53,7 +53,7 @@ const Navbar: React.FC = () => {
       bg="black"
       borderColor="gray.800"
     >
-      <Box maxW="6xl" mx="auto" px={{ base: 4, sm: 6, lg: 8 }}>
+      <Box maxW="6xl" mx="auto" px={{ base: 4, sm: 6, lg: 4 }}>
         <Flex justify="space-between" h={20} align="center">
           <Flex align="center">
             <Link href="/" _hover={{ textDecoration: 'none' }}>
@@ -89,6 +89,7 @@ const Navbar: React.FC = () => {
                   color="gray.200"
                   border="1px solid"
                   borderColor="gray.700"
+                  borderRadius="2px"
                   px={4}
                   py={2}
                   fontWeight="500"

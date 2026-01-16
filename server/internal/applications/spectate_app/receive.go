@@ -26,6 +26,7 @@ func (s *spectateService) SendToSpectators(payload domain.SpectateServicePayload
 		err = repo.Send(data)
 		if err != nil {
 			log.Println("Error sending data to a spectator:", err)
+			repo.Close()
 			delete(s.repoMap[payload.GameId], repo)
 		}
 	}

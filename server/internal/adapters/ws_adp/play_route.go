@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/vanshjangir/vango/server/internal/domain"
 )
 
 func getUpgrader(ctx *gin.Context) (websocket.Upgrader, error) {
@@ -70,6 +72,31 @@ func (wsh *WsHandler) reconnectExistingGame(
 	log.Printf("Player %v reconnected\n", username)
 }
 
+func (wsh *WsHandler) spectateGame(gameId int, c *websocket.Conn) {
+	game := wsh.ws.GetGameFromId(gameId)
+	if game == nil {
+		log.Println("Game not found", gameId)
+		c.WriteMessage(websocket.TextMessage, []byte("Game not found"))
+		c.Close()
+		return
+	}
+
+	wsGameRepo := NewWebsocketGameRepo(c)
+	wsh.ss.AddSpectator(game, wsGameRepo)
+
+	var blackGame, whiteGame *domain.Game
+	if game.Color == domain.BlackColor {
+		blackGame = game
+		whiteGame = wsh.ws.GetGameFromPlayerName(game.OpName)
+	} else {
+		whiteGame = game
+		blackGame = wsh.ws.GetGameFromPlayerName(game.OpName)
+	}
+
+	wsh.ss.SendSyncState(blackGame, whiteGame, wsGameRepo)
+	log.Println("New spectator added to game:", gameId)
+}
+
 func (wsh *WsHandler) play(ctx *gin.Context) {
 	usernameItf, exists := ctx.Get("username")
 	if !exists {
@@ -95,6 +122,18 @@ func (wsh *WsHandler) play(ctx *gin.Context) {
 	}
 
 	wsGameRepo := NewWebsocketGameRepo(c)
+
+	gameIdString := ctx.Param("gameid")
+	if gameIdString != "" {
+		gameId, err := strconv.Atoi(ctx.Param("gameid"))
+		if wsh.ss.IsPlayerInGame(username, gameId) == false {
+			if err != nil {
+				log.Println("Invalid gameid", ctx.Param("gameid"))
+			}
+			wsh.spectateGame(gameId, c)
+			return
+		}
+	}
 
 	if wsh.ws.GameExists(username) {
 		wsh.reconnectExistingGame(username, wsGameRepo, c)

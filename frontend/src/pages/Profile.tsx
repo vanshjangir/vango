@@ -26,7 +26,8 @@ const Profile = () => {
   const { username } = useParams();
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const [userData, setUserData] = useState<UserProfileData | null>(null);
-  const token = localStorage.getItem('token') || "";
+  const token = localStorage.getItem("token") || "";
+  const tokenType = localStorage.getItem("tokenType") || "";
   const [textAreaVis, setTextAreaVis] = useState<boolean>(false);
   const [newUsername, setNewUsername] = useState<string>("");
 
@@ -47,7 +48,7 @@ const Profile = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": token,
+        "Authorization": `${tokenType} ${token}`,
       },
       body: JSON.stringify({
         "username": username,
@@ -101,13 +102,12 @@ if (!userData) {
     >
       <Navbar />
       <Box 
-        maxW="7xl" 
+        maxW="6xl" 
         mx="auto" 
         w="full" 
-        px={{ base: 4, sm: 6, lg: 8 }} 
+        px={{ base: 4, sm: 6, lg: 4 }} 
         py={8}
       >
-        {/* Profile Header */}
         <Box
           bg="gray.900"
           borderRadius="2px"
@@ -194,7 +194,6 @@ if (!userData) {
           </Flex>
         </Box>
 
-        {/* Statistics Section */}
         <Box mb="8">
           <Heading 
             as="h2" 
@@ -264,7 +263,6 @@ if (!userData) {
           </Grid>
         </Box>
 
-        {/* Recent Games Section */}
         <Box
           bg="gray.900"
           borderRadius="2px"

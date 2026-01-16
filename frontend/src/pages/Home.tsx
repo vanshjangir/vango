@@ -40,9 +40,8 @@ const Home = () => {
       color="white"
     >
       <Navbar />
-
       <Flex flex="1" align="center" justify="center" px={6} py={10}>
-        <Container maxW="960px">
+        <Container maxW="6xl" mx="auto">
           <Box>
             <Text fontSize="4xl" fontWeight="600" letterSpacing="tight">
               Play Go, simply.
@@ -73,31 +72,24 @@ const Home = () => {
             spacing={{ base: 10, md: 16 }}
             marginTop={"24px"}
             align="flex-start"
+            gap={4}
             justify="space-between"
             flexDir={{ base: "column", md: "row" }}
           >
-            <VStack
-              align="flex-start"
-              spacing={6}
-              w={{ base: "100%", md: "50%" }}
-            >
-
-              <VStack w="full" spacing={4}>
-                <PlayButton
-                  label={"Play Online"}
-                  handler={findGame}
-                />
-                <PlayButton
-                  label={"Spectate"}
-                  handler={findGame}
-                />
-              </VStack>
+            <VStack w={{ base: "100%", md: "50%" }} spacing={4}>
+              <PlayButton
+                label={"Play Online"}
+                handler={findGame}
+              />
+              <PlayButton
+                label={"Spectate"}
+                handler={findGame}
+              />
             </VStack>
 
-            {/* Right: Board preview */}
             <Box
-              w={{ base: "260px", md: "380px" }}
-              h={{ base: "260px", md: "380px" }}
+              w={{ base: "100%", md: "50%" }}
+              h={{ base: "100%", md: "50%" }}
               borderRadius="2px"
               overflow="hidden"
             >

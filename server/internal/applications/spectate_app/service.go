@@ -8,6 +8,17 @@ type spectateService struct {
 	msgChan chan string
 }
 
+func (s *spectateService) IsPlayerInGame(username string, gameId int) bool {
+	game, err := s.pr.GetGameFromUsername(username)
+	if err != nil {
+		return false
+	}
+	if game.GameId == gameId {
+		return true
+	}
+	return false
+}
+
 func NewSpectateService(pr ports.PubSubRepository) ports.SpectateService {
 	return &spectateService{
 		pr:      pr,

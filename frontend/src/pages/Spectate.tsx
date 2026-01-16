@@ -1,304 +1,235 @@
-import { useState, useEffect, useRef } from "react";
-import { useParams } from 'react-router-dom';
-import { MsgChat, MsgMove, MsgMoveStatus, MsgSync, MsgGameover } from "../types/game";
+import { useEffect, useRef, useState } from "react";
+import { ChatMessage, MsgMove, MsgSync, MsgGameover, MsgStart } from "../types/game";
 import { GameState } from "../types/game";
 import Navbar from "../components/Navbar";
 import {
   cellSize,
   gridSize,
-  BLACK_CELL,
   EMPTY_CELL,
   redrawCanvas,
   decodeState,
+  WHITE_CELL,
+  BLACK_CELL,
 } from "../utils/board";
 import {
   Box,
   Flex,
   VStack,
-  HStack,
-  Circle,
   Text,
+  Input,
+  Button,
+  HStack,
 } from "@chakra-ui/react";
 
 const Spectate: React.FC = () => {
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const socketRef = useRef<WebSocket | null>(null);
-  const setupSocketRef = useRef<boolean>(false);
-  const intervalRef = useRef<number | null>(null);
-  const playerClockRef = useRef<HTMLDivElement>(null);
-  const opponentClockRef = useRef<HTMLDivElement>(null);
-  const gameStateRef = useRef<GameState | null>(null);
-  const historyDivRef = useRef<HTMLDivElement>(null);
-  const msgRef = useRef<HTMLDivElement>(null);
-  
-  const BACKEND_URL = import.meta.env.PROD ?
-    import.meta.env.VITE_HTTPS_URL :
-    import.meta.env.VITE_HTTP_URL;
-  const token = localStorage.getItem("token") || "";
-  const { gameId } = useParams();
-  const [pname, setPname] = useState<string>("Black");
-  const [opname, setOpname] = useState<string>("White");
-  const [currentTurn, setCurrentTurn] = useState<boolean>(false);
-  const wsWsPrefix = import.meta.env.PROD ? "wss://" : "ws://";
+  const gsRef = useRef<GameState | null>(null);
+  const messages = useRef<ChatMessage[]>([]);
+  const [pRemTime, setPRemTime] = useState<number>(60000);
+  const [opRemTime, setOpRemTime] = useState<number>(60000);
+  const [history, setHistory] = useState<string[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState<string>("");
+  const tickRef = useRef<boolean>(false);
+  const turnRef = useRef<number>(BLACK_CELL);
+  const [msg, setMsg] = useState<string>("Starting...");
+  const historyBoxRef = useRef<HTMLDivElement>(null);
+  const chatBoxRef = useRef<HTMLDivElement>(null);
 
-  let playerTime = 900;
-  let opponentTime = 900;
+  let started = false;
 
   const getGameState = async () => {
     const socket = socketRef.current;
     if (!socket) return;
-    socket.send(JSON.stringify({ type: "reqState", }));
+    socket.send(JSON.stringify({ type: "syncstate", }));
   };
 
   const updateState = (state: string, move: string) => {
-    if (!gameStateRef.current)
+    if (!gsRef.current)
       return;
     
-    const gameState = gameStateRef.current;
-    const newMoves = decodeState(gameStateRef, state);
+    const gameState = gsRef.current;
+    const newMoves = decodeState(gsRef, state);
     
     newMoves.forEach((item) => {
       gameState.state[item.x][item.y] = item.c;
       if (item.c === EMPTY_CELL) {
         return;
       }
-      gameState.turn = !gameState.turn;
-      setCurrentTurn(gameState.turn);
-      showMoveStatus(move);
+      setMsg(move);
     });
 
+    if (!gameState.history) gameState.history = [];
     gameState.history.push(move);
-    redrawCanvas(canvasRef, gameStateRef, ctxRef);
-    updateHistory(gameState.history);
+    redrawCanvas(canvasRef, gsRef, ctxRef);
   }
 
   const handleSocketRecv = async (data: any) => {
-    const msg: MsgMove | MsgMoveStatus | MsgSync | MsgGameover | MsgChat =
-      await JSON.parse(data);
+    const msg: MsgMove|MsgSync|MsgGameover|MsgStart = await JSON.parse(data);
     switch (msg.type) {
+      case "start":
+        await afterStart(msg);
+        break;
+
       case "move":
-        if (gameStateRef.current) {
-          const gameState = gameStateRef.current;
+        if (gsRef.current) {
+          const gameState = gsRef.current;
           if (msg.move === "ps") {
             gameState.history.push(msg.move);
-            gameState.turn = !gameState.turn;
-            setCurrentTurn(gameState.turn);
-            updateHistory(gameState.history);
-            showMoveStatus("Pass");
+            setMsg("Pass")
           } else {
             updateState(msg.state, msg.move);
           }
-          playerTime = 900 - Math.round(msg.selfTime / 1000);
-          opponentTime = 900 - Math.round(msg.opTime / 1000);
+          setHistory([...gameState.history]);
+          turnRef.current = 1 - turnRef.current;
+        }
+        break;
+
+      case "syncstate":
+        if (gsRef.current) {
+          const gs = gsRef.current;
+          gs.pname = gs.color === WHITE_CELL ? msg.whitename : msg.blackname;
+          gs.opname = gs.color === WHITE_CELL ? msg.blackname : msg.whitename;
+          updateState(msg.state, "");
+
+          gs.history = msg.history;
+          setHistory([...msg.history]);
+          setPRemTime(gs.color === WHITE_CELL ? msg.whiteRemTime : msg.blackRemTime);
+          setOpRemTime(gs.color === WHITE_CELL ? msg.blackRemTime : msg.whiteRemTime);
+          redrawCanvas(canvasRef, gsRef, ctxRef);
         }
         break;
 
       case "gameover":
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-        showEndMessage(
-          msg.winner === gameStateRef.current?.color ?
-            `${pname} won` : `${opname} won`
-        );
-        socketRef.current?.close();
-        break;
-
-      case "sync":
-        if (gameStateRef.current) {
-          const gameState = gameStateRef.current;
-          gameState.gameId = msg.gameId;
-          gameState.color = msg.color;
-          gameState.pname = msg.pname;
-          gameState.opname = msg.opname;
-          gameState.turn = msg.turn;
-          
-          setPname(gameState.pname)
-          setOpname(gameState.opname)
-          setCurrentTurn(gameState.turn);
-
-          updateState(msg.state, "");
-         
-          // setting the turn here again, cuz updateState messes up with
-          // turn as well
-          gameState.turn = msg.turn;
-
-          gameState.history = msg.history;
-          playerTime = 900 - Math.round(msg.selfTime / 1000);
-          opponentTime = 900 - Math.round(msg.opTime / 1000);
-          redrawCanvas(canvasRef, gameStateRef, ctxRef);
-          setupClock();
-          updateHistory(gameState.history);
-        }
-        break;
-
-      default:
-        socketRef.current?.close();
+        tickRef.current = false;
+        setMsg(msg.winner === gsRef.current?.color ? "You won" : "You lost");
+        destSocket();
         break;
     }
   };
   
-  const getWsurl = async () => {
-    const response = await fetch(BACKEND_URL + "/getwsurl", {
-      headers: { Authorization : token }
-    });
-
-    const json = await response.json();
-    return json.wsurl || "";
+  const destSocket = async () => {
+    if (socketRef.current) {
+      socketRef.current.close();
+      socketRef.current = null;
+    }
   }
 
   const setupSocket = async () => {
-    if (setupSocketRef.current) return;
-    setupSocketRef.current = true;
-
-    const wsurl = await getWsurl();
-    socketRef.current = new WebSocket(
-      `${wsWsPrefix}${wsurl}/spectate/${gameId}?token=${token}`
-    );
-    if (socketRef.current) {
-      socketRef.current.onmessage = async (event: MessageEvent) => {
-        const data = await event.data;
-        handleSocketRecv(data);
-      };
-    }
-  };
-
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, "0");
-    const secs = (seconds % 60).toString().padStart(2, "0");
-    return `${minutes}:${secs}`;
-  };
-
-  const updateClock = () => {
-    if (!playerClockRef.current || !opponentClockRef.current || !gameStateRef.current) {
-      return;
-    }
-    if (gameStateRef.current.turn === true) {
-      playerClockRef.current.textContent = formatTime(playerTime);
-    } else {
-      opponentClockRef.current.textContent = formatTime(opponentTime);
-    }
-  };
-
-  const setupClock = () => {
-    if (playerClockRef.current && opponentClockRef.current) {
-      playerClockRef.current.textContent = formatTime(playerTime);
-      opponentClockRef.current.textContent = formatTime(opponentTime);
-    }
-  };
-
-  const showMoveStatus = (msg: string) => {
-    if (msgRef.current) {
-      msgRef.current.className = "text-center text-xl font-bold h-[40px]";
-      if (!isNaN(Number(msg.slice(1)))) {
-        msgRef.current.innerText = toShow(msg);
-      } else {
-        msgRef.current.innerText = msg === "ps" ? "Pass" : msg;
-      }
-    }
-  };
-
-  const showEndMessage = (msg: string) => {
-    if (msgRef.current) {
-      msgRef.current.className = "text-center text-3xl font-bold h-[40px]";
-      msgRef.current.innerText = msg;
-    }
-  };
-
-  const toShow = (move: string) => {
-    if (move) {
-      return move === "ps" ? "Pass" :
-        move[0].toUpperCase() + String(Number(move.slice(1)) + 1);
-    }
-    return "";
-  };
-
-  const updateHistory = (history: string[]) => {
-    if (history.length > 2) {
-      const last = history[history.length - 1];
-      const slast = history[history.length - 2];
-      if (last === "ps" && slast === "ps") {
-        if (msgRef.current) {
-          msgRef.current.className = "text-center text-3xl font-bold h-[40px]";
-          msgRef.current.innerText = "Evaluating...";
-        }
-      }
-    }
-
-    if (historyDivRef.current) {
-      historyDivRef.current.innerHTML = "";
-      history.forEach((_, index) => {
-        if (index % 2 === 0) {
-          const rowDiv = document.createElement("div");
-          rowDiv.className = "text-white flex flex-row w-full";
-
-          const firstMove = document.createElement("div");
-          firstMove.className = "bg-[#2d3748] w-[50%] text-center p-1";
-          firstMove.textContent = toShow(history[index]);
-
-          const secondMove = document.createElement("div");
-          secondMove.className = "bg-[#4a5568] w-[50%] text-center p-1";
-          secondMove.textContent = toShow(history[index + 1]);
-
-          rowDiv.appendChild(firstMove);
-          rowDiv.appendChild(secondMove);
-
-          if (historyDivRef.current)
-            historyDivRef.current.appendChild(rowDiv);
-        }
-      });
-      
-      historyDivRef.current.scrollTop = historyDivRef.current.scrollHeight;
-    }
-  };
-
-  useEffect(() => {
-    redrawCanvas(canvasRef, gameStateRef, ctxRef);
-    setupClock();
-  }, [gameStateRef.current]);
-
-  useEffect(() => {
-    intervalRef.current = window.setInterval(() => {
-      if (!gameStateRef.current) return;
-      gameStateRef.current.turn === true ? playerTime -= 1 : opponentTime -= 1;
-      updateClock();
-    }, 1000);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+    const wsurl = localStorage.getItem('wsurl') ?? '';
+    const token = localStorage.getItem('token');
+    const tokenType = localStorage.getItem('tokenType');
+    socketRef.current = new WebSocket(`${wsurl}/play`, `${tokenType}.${token}`);
+    socketRef.current.onmessage = async (event: MessageEvent) => {
+      const data = await event.data;
+      await handleSocketRecv(data);
     };
-  }, []);
+  };
+
+  const afterStart = async (msg: MsgStart) => {
+    await getGameState();
+    if (gsRef.current) gsRef.current.color = msg.color;
+    tickRef.current = true;
+    setMsg("Started")
+    const url = new URL(window.location.href);
+    url.searchParams.set("id", `${msg.gameid}`);
+    window.history.replaceState({}, "", url);
+    tickClock();
+  }
+
+  const updateClock = async () => {
+    if (!gsRef.current) return;
+    if (gsRef.current.color == turnRef.current) {
+      setPRemTime(t => t - 1000);
+    } else {
+      setOpRemTime(t => t - 1000);
+    }
+  }
+
+  const tickClock = async () => {
+    setTimeout(() => {
+      if (!tickRef.current) return;
+      updateClock();
+      tickClock();
+    }, 1*1000);
+  }
+
+  const formatTime = (ms: number) => {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
 
   useEffect(() => {
-    gameStateRef.current = {
-      gameId: gameId || "",
+    redrawCanvas(canvasRef, gsRef, ctxRef);
+  }, [gsRef.current]);
+
+
+  const startSetup = async () => {
+    if (started) return;
+    started = true;
+
+    gsRef.current = {
+      gameId: "",
       pname: "",
       opname: "",
-      color: BLACK_CELL,
-      state: Array.from({ length: 19 }, () => Array(19).fill(EMPTY_CELL)),
-      turn: true,
-      history: []
-    };
-
-    setCurrentTurn(gameStateRef.current.turn);
-    setupSocket();
-    getGameState();
-
+      color: EMPTY_CELL,
+      state: Array.from({length: 19}, () => new Array(19).fill(EMPTY_CELL)),
+      history: [],
+    }
+    
     const resizeHandler = () => {
-      redrawCanvas(canvasRef, gameStateRef, ctxRef);
+      redrawCanvas(canvasRef, gsRef, ctxRef);
     };
 
     window.addEventListener("resize", resizeHandler);
-    redrawCanvas(canvasRef, gameStateRef, ctxRef);
+    redrawCanvas(canvasRef, gsRef, ctxRef);
+    
+    await setupSocket();
+  }
 
-    return () => {
-      window.removeEventListener("resize", resizeHandler);
-    };
+  useEffect(() => {
+    if (historyBoxRef.current) {
+      historyBoxRef.current.scrollTop = historyBoxRef.current.scrollHeight
+    }
+  })
+
+  useEffect(() => {
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  const sendChatMessage = () => {
+    const socket = socketRef.current;
+    const text = chatInput.trim();
+    if (!socket || !text) return;
+    socket.send(JSON.stringify({ type: "chat", text: text }));
+    messages.current = [
+      ...messages.current,
+      { type: "sent", text }
+    ];
+    setChatMessages([...messages.current]);
+    setChatInput("");
+  };
+
+  const sendPassMove = () => {
+    const socket = socketRef.current;
+    if (!socket) return;
+    socket.send(JSON.stringify({ type: "move", move: "ps" }));
+  };
+
+  const sendAbort = () => {
+    const socket = socketRef.current;
+    if (!socket) return;
+    socket.send(JSON.stringify({ type: "abort" }));
+  };
+
+  useEffect(() => {
+    startSetup();
   }, []);
 
   return (
@@ -306,229 +237,233 @@ const Spectate: React.FC = () => {
       minH="100vh" 
       display="flex" 
       flexDirection="column" 
-      bg="linear-gradient(135deg, #1a202c 0%, #2d3748 25%, #4a5568 50%, #2d3748 75%, #1a202c 100%)"
+      bg="black"
       overflowY="auto"
-      position="relative"
-      overflow="hidden"
     >
-      <Box
-        position="absolute"
-        top="0"
-        left="0"
-        right="0"
-        bottom="0"
-        opacity="0.05"
-        backgroundSize="100px 100px"
-      />
-
       <Navbar />
       <Flex 
         id="game-container" 
         w="100%" 
-        flexDirection={{ base: "column", lg: "row" }} 
+        flexDirection={{ base: "column", lg: "row", sm: "column" }} 
         alignItems={{ base: "center", lg: "flex-start" }} 
         justifyContent="center"
         gap={8}
         p={6}
-        position="relative"
-        zIndex={1}
       >
-        <VStack 
-          id="game-clocks" 
-          spacing={6} 
-          align="center"
-          w={{ base: "100%", lg: "auto" }}
-          order={{ base: 1, lg: 1 }}
-        >
-          <VStack 
-            color="white" 
-            w={{ base: `${gridSize + 2 * cellSize}px`, lg: "100%" }}
-            justifyContent="space-between"
-            bg="linear-gradient(135deg, rgba(26, 32, 44, 0.9), rgba(45, 55, 72, 0.8))"
-            backdropFilter="blur(12px)"
-            rounded="2xl"
-            p={6}
-            border="2px solid"
-            borderColor="whiteAlpha.200"
-            boxShadow="0 20px 40px rgba(0, 0, 0, 0.4)"
-          >
-            <VStack spacing={2} textAlign="center">
-              <HStack w={"200px"} spacing={3} alignItems="center" justifyContent="center">
-                <Circle 
-                  size="20px"
-                  position={"absolute"}
-                  left={"20px"}
-                  bg={
-                    1 - (gameStateRef.current?.color || 0) === BLACK_CELL ?
-                    "#2D3748" : "#F7FAFC"
-                  } 
-                  border="2px solid" 
-                  borderColor={
-                    1 - (gameStateRef.current?.color || 0) === BLACK_CELL ?
-                    "#4A5568" : "#E2E8F0"
-                  }
-                />
-                <Text fontSize="xl" fontWeight="600" color="orange.200">{opname}</Text>
-              </HStack>
-              <Box 
-                as="div" 
-                ref={opponentClockRef} 
-                fontSize="2xl" 
-                fontWeight="700"
-                bg={!currentTurn 
-                  ? "linear-gradient(135deg, rgba(72, 187, 120, 0.3), rgba(56, 161, 105, 0.3))" 
-                  : ""
-                }
-                px={4}
-                py={2}
-                rounded="xl"
-                fontFamily="mono"
-                border="2px solid"
-                borderColor={!currentTurn ? "green.400" : "transparent"}
-                textShadow={!currentTurn 
-                  ? "0 0 10px rgba(72, 187, 120, 0.5)" 
-                  : "0 0 10px rgba(246, 173, 85, 0.3)"
-                }
-                transition="all 0.3s ease"
-              />
-            </VStack>
-            <VStack spacing={2} textAlign="center">
-              <HStack spacing={3} alignItems="center" justifyContent="center">
-                <Circle 
-                  size="20px" 
-                  position={"absolute"}
-                  left={"20px"}
-                  bg={gameStateRef.current?.color === BLACK_CELL ? "#2D3748" : "#F7FAFC"} 
-                  border="2px solid" 
-                  borderColor={gameStateRef.current?.color === BLACK_CELL ? "#4A5568" : "#E2E8F0"}
-                />
-                <Text fontSize="xl" fontWeight="600" color="orange.200">{pname}</Text>
-              </HStack>
-              <Box 
-                as="div" 
-                ref={playerClockRef} 
-                fontSize="2xl" 
-                fontWeight="700"
-                bg={currentTurn 
-                  ? "linear-gradient(135deg, rgba(72, 187, 120, 0.3), rgba(56, 161, 105, 0.3))" 
-                  : ""
-                }
-                px={4}
-                py={2}
-                rounded="xl"
-                fontFamily="mono"
-                border="2px solid"
-                borderColor={currentTurn ? "green.400" : "transparent"}
-                textShadow={currentTurn 
-                  ? "0 0 10px rgba(72, 187, 120, 0.5)" 
-                  : "0 0 10px rgba(246, 173, 85, 0.3)"
-                }
-                transition="all 0.3s ease"
-              />
-            </VStack>
-          </VStack>
-        </VStack>
-
         <VStack 
           id="game-board" 
           spacing={6} 
           align="center"
           order={{ base: 2, lg: 2 }}
         >
-          <Box position="relative">
-            <Box
-              position="absolute"
-              top="-15px"
-              left="-15px"
-              right="-15px"
-              bottom="-15px"
-              borderRadius="3xl"
-              bg="radial-gradient(circle, rgba(246, 173, 85, 0.15), rgba(237, 137, 54, 0.05))"
-              filter="blur(20px)"
-            />
-            <canvas
-              ref={canvasRef}
-              id="canvas"
-              width={gridSize + 2 * cellSize}
-              height={gridSize + 2 * cellSize}
-              style={{
-                position: "relative",
-                zIndex: 2,
-                backgroundColor: "#fef3c7",
-                borderRadius: "24px",
-                border: "3px solid rgba(246, 173, 85, 0.3)",
-                boxShadow: "0 25px 50px rgba(0, 0, 0, 0.5)"
-              }}
-            />
-          </Box>
-        </VStack>
-
-        <VStack 
-          id="game-stats" 
-          spacing={6}
-          w={{ base: `${gridSize + 2 * cellSize}px`, lg: "400px" }}
-          color="white"
-          order={{ base: 3, lg: 3 }}
-        >
-          <Box 
-            ref={msgRef} 
-            textAlign="center" 
-            fontSize="2xl" 
-            fontWeight="900" 
-            h="60px"
-            bg="linear-gradient(135deg, rgba(26, 32, 44, 0.9), rgba(45, 55, 72, 0.8))"
-            backdropFilter="blur(12px)"
-            rounded="2xl"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            border="2px solid"
-            borderColor="whiteAlpha.200"
-            w="100%"
-            bgGradient="linear(to-r, #f6ad55, #ed8936)"
-            bgClip="text"
-            textShadow="0 0 20px rgba(237, 137, 54, 0.3)"
-            boxShadow="0 20px 40px rgba(0, 0, 0, 0.4)"
+          <canvas
+            ref={canvasRef}
+            id="canvas"
+            width={gridSize + 2 * cellSize}
+            height={gridSize + 2 * cellSize}
+            style={{
+              backgroundColor: "#fef3c7",
+              borderRadius: "2px",
+              border: "1px solid #1f2937"
+            }}
           />
-
-          <VStack spacing={4} w="100%">
-            <Box
-              bg="linear-gradient(135deg, rgba(26, 32, 44, 0.9), rgba(45, 55, 72, 0.8))"
-              backdropFilter="blur(12px)"
-              rounded="2xl"
-              border="2px solid"
-              borderColor="whiteAlpha.200"
-              boxShadow="0 20px 40px rgba(0, 0, 0, 0.4)"
-              w="100%"
-              p={4}
-              position="relative"
-              overflow="hidden"
-            >
-              <Box
-                position="absolute"
-                top="0"
-                left="0"
-                right="0"
-                h="3px"
-                bg="linear-gradient(90deg, #f6ad55, #ed8936, #dd6b20)"
-              />
-              <Text fontSize="lg" fontWeight="600" color="orange.200" mb={3}>
-                Game History
-              </Text>
-              <Box
-                ref={historyDivRef}
-                display="flex"
-                flexDirection="column"
-                overflowY="auto"
-                h="200px"
-                w="100%"
-                bg="linear-gradient(135deg, rgba(26, 32, 44, 0.5), rgba(45, 55, 72, 0.5))"
-                borderRadius="xl"
-                border="1px solid"
-                borderColor="whiteAlpha.200"
-              />
+        </VStack>
+        <VStack 
+          id="game-board" 
+          spacing={6} 
+          align="center"
+          order={{ base: 2, lg: 2 }}
+        >
+          <Box
+            px={4}
+            py={3}
+            borderRadius="2px"
+            bg={gsRef.current?.color === BLACK_CELL ? "gray.900" : "gray.100"}
+            color={gsRef.current?.color === BLACK_CELL ? "white" : "black"}
+            border="4px solid"
+            borderColor={gsRef.current?.color === turnRef.current ? "green.500" : "gray.700"}
+            minW="320px"
+            textAlign="center"
+          >
+            <Box fontSize="sm" opacity={0.7}>
+              {gsRef.current?.opname ? gsRef.current?.opname : "Loading..."}
+              {gsRef.current?.color !== turnRef.current ? "(turn)" : ""}
             </Box>
-          </VStack>
+            <Box fontSize="lg" fontWeight="600">{formatTime(opRemTime)}</Box>
+            <Box fontSize="lg" fontWeight="600">{formatTime(pRemTime)}</Box>
+            <Box fontSize="sm" opacity={0.7}>
+              {gsRef.current?.opname ? gsRef.current?.opname : "Loading..."}
+              {gsRef.current?.color === turnRef.current ? "(turn)" : ""}
+            </Box>
+          </Box>
+          <Box
+            fontSize={"4xl"}
+            color={"white"}
+            minW="320px"
+            minH="54px"
+            textAlign="center"
+            fontWeight="500"
+          >
+            {msg}
+          </Box>
+          <HStack w="320px" spacing={3}>
+            <Button
+              flex={1}
+              size="sm"
+              onClick={sendPassMove}
+              bg="green.600"
+              color="white"
+              rounded={"2px"}
+              _hover={{ bg: "green.500" }}
+            >
+              Pass
+            </Button>
+            <Button
+              flex={1}
+              size="sm"
+              onClick={sendAbort}
+              bg="red.600"
+              color="white"
+              rounded={"2px"}
+              _hover={{ bg: "red.500" }}
+            >
+              Abort
+            </Button>
+          </HStack>
+          <Box
+            w="320px"
+            h="220px"
+            overflowY="auto"
+            bg="gray.900"
+            ref={historyBoxRef}
+            borderRadius="2px"
+            border="1px solid"
+            borderColor="gray.800"
+            css={{
+              "&::-webkit-scrollbar": { width: "6px" },
+              "&::-webkit-scrollbar-thumb": { background: "#4b5563", borderRadius: "4px" },
+            }}
+          >
+            <VStack align="stretch" spacing={0}>
+              {Array.from({ length: Math.ceil(history.length / 2) }).map((_, rowIndex) => {
+                const moveIndex = rowIndex * 2;
+                const blackMove = history[moveIndex];
+                const whiteMove = history[moveIndex + 1];
+                
+                return (
+                  <Flex key={rowIndex}>
+                    <Box
+                      flex={1}
+                      px={3}
+                      py={2}
+                      bg={blackMove ? "gray.800" : "gray.900"}
+                      textAlign="center"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <Text
+                        color={blackMove ? "white" : "gray.600"}
+                        fontWeight="500"
+                        fontSize="sm"
+                      >
+                        {moveIndex + 1}. {blackMove === "ps" ? "Pass" : blackMove || ""}
+                      </Text>
+                    </Box>
+                    <Box
+                      flex={1}
+                      px={3}
+                      py={2}
+                      bg={whiteMove ? "gray.100" : "gray.900"}
+                      textAlign="center"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <Text
+                        color={whiteMove ? "black" : "gray.600"}
+                        fontWeight="500"
+                        fontSize="sm"
+                      >
+                        {whiteMove ? `${moveIndex + 2}. ${whiteMove === "ps" ? "Pass" : whiteMove}` : ""}
+                      </Text>
+                    </Box>
+                  </Flex>
+                );
+              })}
+              {history.length === 0 && (
+                <Text color="gray.500" textAlign="center" py={4} fontSize="sm">
+                  No moves yet
+                </Text>
+              )}
+            </VStack>
+          </Box>
+          <Box
+            w="320px"
+            h="228px"
+            bg="gray.900"
+            borderRadius="2px"
+            border="1px solid"
+            borderColor="gray.800"
+            overflow="hidden"
+            display="flex"
+            flexDirection="column"
+            gap={3}
+            p={3}
+          >
+            <Text fontSize="md" fontWeight="600" color="white" mb={1}>
+              Chat
+            </Text>
+            <Box
+              ref={chatBoxRef}
+              flex="1"
+              overflowY="auto"
+              css={{
+                "&::-webkit-scrollbar": { width: "6px" },
+                "&::-webkit-scrollbar-thumb": { background: "#4b5563", borderRadius: "4px" },
+              }}
+            >
+              <VStack align="stretch" spacing={2}>
+                {chatMessages.map((m, idx) => (
+                  <Flex key={idx} justify={m.type === "sent" ? "flex-end" : "flex-start"}>
+                    <Box
+                      maxW="80%"
+                      px={3}
+                      py={2}
+                      borderRadius="md"
+                      color={m.type === "sent" ? "white" : "gray.400"}
+                      fontSize="sm"
+                      boxShadow="sm"
+                    >
+                      {m.text}
+                    </Box>
+                  </Flex>
+                ))}
+                {chatMessages.length === 0 && (
+                  <Text color="gray.500" fontSize="sm" textAlign="center">
+                    No messages yet
+                  </Text>
+                )}
+              </VStack>
+            </Box>
+            <HStack>
+              <Input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Type a message..."
+                bg="gray.800"
+                borderColor="gray.700"
+                color="white"
+                _placeholder={{ color: "gray.500" }}
+              />
+              <Button
+                onClick={sendChatMessage}
+                colorScheme="blue"
+              >
+                Send
+              </Button>
+            </HStack>
+          </Box>
         </VStack>
       </Flex>
     </Box>
