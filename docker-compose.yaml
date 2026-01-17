@@ -1,6 +1,6 @@
 services:
   backend:
-    image: vanshjangir/rapid-go:backend
+    image: vanshjangir/vango-backend
     build:
       context: ./server/
       dockerfile: Backend.Dockerfile
@@ -10,7 +10,7 @@ services:
       - "host.docker.internal:host-gateway"
   
   websocket:
-    image: vanshjangir/rapid-go:websocket
+    image: vanshjangir/vango-websocket
     build:
       context: ./server/
       dockerfile: Websocket.Dockerfile
@@ -19,8 +19,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
   
-  client:
-    image: vanshjangir/rapid-go:client
+  frontend:
+    image: vanshjangir/vango-frontend
     build:
       context: ./frontend/
       args:
@@ -30,6 +30,6 @@ services:
       - "5173:80"
 
   redis:
-    image: vanshjangir/rapid-go:redis
+    image: vanshjangir/vango:redis
     ports:
       - "6379:6379"
