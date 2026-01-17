@@ -14,14 +14,12 @@ import {
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { FiLogOut } from "react-icons/fi";
-import { ReconnectButton } from "./Buttons";
 
 const Navbar: React.FC = () => {
   const { isOpen, onToggle } = useDisclosure();
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const username = localStorage.getItem('username');
   const [logged, setLogged] = useState<boolean>(isLoggedIn);
-  const [recon, setRecon] = useState(false);
   const nav = useNavigate();
 
   useEffect(() => {
@@ -35,9 +33,6 @@ const Navbar: React.FC = () => {
 
   const checkOngoing = async () => {
   }
-
-  const reconnect = async () => {
-  };
 
   useEffect(() => {
     checkOngoing();
@@ -65,9 +60,6 @@ const Navbar: React.FC = () => {
                 VanGo
               </Text>
             </Link>
-            {recon === true && (
-              <ReconnectButton handler={reconnect} />
-            )}
           </Flex>
 
           <HStack spacing={3} display={{ base: "none", md: "flex" }} align="center">
@@ -157,11 +149,6 @@ const Navbar: React.FC = () => {
           borderColor="gray.800"
         >
           <VStack spacing={2} px={4} pt={4}>
-            {recon === true && (
-              <Box w="full">
-                <ReconnectButton handler={reconnect} />
-              </Box>
-            )}
             {logged ? (
               <>
                 <Link
