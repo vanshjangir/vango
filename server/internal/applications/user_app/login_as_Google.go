@@ -2,6 +2,7 @@ package user_app
 
 import (
 	"database/sql"
+	"log"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -18,7 +19,8 @@ func (s *userService) LoginByGoogle(credentials string) (string, error) {
 	var user domain.User
 	user, err = s.ur.FindByEmail(tokenInfo.Email)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		log.Println("error",err, sql.ErrNoRows)
+		if err.Error() == "record not found" {
 			uniqueId := int(uuid.New().ID())
 			username := "U" + strconv.Itoa(uniqueId)
 			err = s.ur.InsertUser(domain.User{

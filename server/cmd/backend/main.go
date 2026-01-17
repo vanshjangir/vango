@@ -15,11 +15,11 @@ import (
 
 func main() {
 	if err := godotenv.Load(".env"); err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 
 	if err := util_app.Load("./gameservers.json"); err != nil {
-		log.Fatal("Error loading game servers", err)
+		log.Println("Error loading game servers", err)
 	}
 
 	db := postgres_adp.SetupDB()
