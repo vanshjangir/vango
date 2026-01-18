@@ -31,6 +31,7 @@ func NewWsHandler(
 
 func (wsh *WsHandler) RegisterRoutes() {
 	wsh.r.GET("/play", wsh.wsAuth, wsh.play)
+	wsh.r.GET("/spectate", wsh.wsAuth, wsh.spectate)
 }
 
 func (wsh *WsHandler) Run() {

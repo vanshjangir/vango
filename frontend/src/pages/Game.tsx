@@ -156,6 +156,9 @@ const Game: React.FC = () => {
       const data = await event.data;
       await handleSocketRecv(data);
     };
+    socketRef.current.onclose = async () => {
+      tickRef.current = false;
+    }
   };
 
   const afterStart = async (msg: MsgStart) => {

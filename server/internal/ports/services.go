@@ -40,6 +40,7 @@ type MatchMakingService interface {
 type SpectateService interface {
 	Start()
 	AddSpectator(game *domain.Game, repo WsGameRepository)
-	SendSyncState(blackGame, whiteGame *domain.Game, repo WsGameRepository)
+	SendStartConfirmation(repo WsGameRepository) error
+	SendSyncState(blackGame, whiteGame *domain.Game, repo WsGameRepository) error
 	IsPlayerInGame(username string, gameId int) bool
 }

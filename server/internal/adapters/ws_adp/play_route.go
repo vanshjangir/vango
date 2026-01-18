@@ -93,7 +93,17 @@ func (wsh *WsHandler) spectateGame(gameId int, c *websocket.Conn) {
 		blackGame = wsh.ws.GetGameFromPlayerName(game.OpName)
 	}
 
-	wsh.ss.SendSyncState(blackGame, whiteGame, wsGameRepo)
+	err := wsh.ss.SendStartConfirmation(wsGameRepo)
+	if err != nil {
+		log.Println("spectateGame: SendSyncState:", err)
+		return
+	}
+	
+	err = wsh.ss.SendSyncState(blackGame, whiteGame, wsGameRepo)
+	if err != nil {
+		log.Println("spectateGame: SendSyncState:", err)
+		return
+	}
 	log.Println("New spectator added to game:", gameId)
 }
 

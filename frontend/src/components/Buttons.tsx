@@ -1,4 +1,5 @@
-import { Button } from "@chakra-ui/react";
+import { Box, Button, Input } from "@chakra-ui/react";
+import { useState } from "react";
 
 export const PlayButton = (
   {label, handler}:{
@@ -25,6 +26,58 @@ export const PlayButton = (
     >
       {label}
     </Button>
+  );
+};
+
+export const SpectatorButton = (
+  {label, handler}:{
+    label: string;
+    handler: (gameId: string) => void;
+  }
+) => {
+  const [gameId, setGameId] = useState<string>("");
+  return (
+    <Box
+      w="full"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <Input
+        w="full"
+        rounded="2px 2px 0px 0px"
+        border="1px solid"
+        textAlign="center"
+        placeholder="Game Id or Link"
+        onChange={(e) => {
+          const value = e.target.value;
+          let id = "";
+          for (let i = value.length-1; i >= 0; i--) {
+            if (!isNaN(Number(value[i]))) id = value[i] + id;
+            else break;
+          }
+          setGameId(id)
+        }}
+      />
+      <Button
+        onClick={() => handler(gameId)}
+        w="full"
+        h="200px"
+        fontSize="3xl"
+        fontWeight="600"
+        rounded="0px 0px 2px 2px"
+        bg="white"
+        color="gray.900"
+        borderColor="gray.300"
+        _hover={{
+          bg: "gray.100",
+          borderColor: "gray.400"
+        }}
+      >
+        {label}
+      </Button>
+    </Box>
   );
 };
 

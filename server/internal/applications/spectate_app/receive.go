@@ -2,6 +2,7 @@ package spectate_app
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/vanshjangir/vango/server/internal/domain"
@@ -32,9 +33,26 @@ func (s *spectateService) SendToSpectators(payload domain.SpectateServicePayload
 	}
 }
 
-func (s *spectateService) SendSyncState(blackGame, whiteGame *domain.Game, repo ports.WsGameRepository) {
+func (s *spectateService) SendStartConfirmation(repo ports.WsGameRepository) error {
+	var startMsg domain.MsgStart
+	startMsg.Type = "start"
+	startMsg.Color = domain.BlackColor
+
+	data, err := json.Marshal(startMsg)
+	if err != nil {
+		return fmt.Errorf("SendStartConfirmation: Marshal: %v", err)
+	}
+	
+	err = repo.Send(data)
+	if err != nil {
+		return fmt.Errorf("SendStartConfirmation: repo.Send: %v", err)
+	}
+	return nil
+}
+
+func (s *spectateService) SendSyncState(blackGame, whiteGame *domain.Game, repo ports.WsGameRepository) error {
 	var syncState domain.MsgSyncState
-	syncState.Type = "sync"
+	syncState.Type = "syncstate"
 	syncState.Gameid = blackGame.Id
 	syncState.BlackName = blackGame.PName
 	syncState.WhiteName = whiteGame.PName
@@ -45,13 +63,15 @@ func (s *spectateService) SendSyncState(blackGame, whiteGame *domain.Game, repo 
 
 	data, err := json.Marshal(syncState)
 	if err != nil {
-		log.Println("SendToSpectators: Marshal:", err)
-		return
+		return fmt.Errorf("SendSyncState: Marshal: %v", err)
 	}
+	
 	err = repo.Send(data)
 	if err != nil {
-		log.Println("Error sending data to a spectator:", err)
+		return fmt.Errorf("SendSyncState: repo.Send: %v", err)
 	}
+
+	return nil
 }
 
 func (s *spectateService) ReceiveGamesData() {

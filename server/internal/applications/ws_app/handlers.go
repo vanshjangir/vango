@@ -138,7 +138,11 @@ func (s *wsGameService) handleGameOverWhenError(game *domain.Game, by string, wi
 	msgGameOver.Winner = winner
 
 	if err := s.SendJSON(game, msgGameOver); err != nil {
-		return fmt.Errorf("handleGameOverWhenError: %v", err)
+		return fmt.Errorf("handleGameOverWhenError: s.SendJSON: %v", err)
+	}
+
+	if err := s.pr.Send(game, msgGameOver); err != nil {
+		return fmt.Errorf("handleGameOverWhenError: s.pr.Send: %v", err)
 	}
 
 	return nil
@@ -155,7 +159,11 @@ func (s *wsGameService) handleGameOver(game *domain.Game, by string, winner int)
 
 	s.SendToOpLocally(game, msgGameOver)
 	if err := s.SendJSON(game, msgGameOver); err != nil {
-		return err
+		return fmt.Errorf("handleGameOver: s.SendJSON: %v", err)
+	}
+
+	if err := s.pr.Send(game, msgGameOver); err != nil {
+		return fmt.Errorf("handleGameOver: s.pr.Send: %v", err)
 	}
 
 	return nil

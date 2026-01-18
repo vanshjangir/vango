@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChatMessage, MsgMove, MsgSync, MsgGameover, MsgStart } from "../types/game";
+import { MsgMove, MsgSync, MsgGameover, MsgStart } from "../types/game";
 import { GameState } from "../types/game";
 import Navbar from "../components/Navbar";
 import {
@@ -16,27 +16,24 @@ import {
   Flex,
   VStack,
   Text,
-  Input,
-  Button,
-  HStack,
 } from "@chakra-ui/react";
+import { useParams } from "react-router-dom";
 
 const Spectate: React.FC = () => {
+  const { id } = useParams();
+  const gameId = id ?? "";
+
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const gsRef = useRef<GameState | null>(null);
-  const messages = useRef<ChatMessage[]>([]);
   const [pRemTime, setPRemTime] = useState<number>(60000);
   const [opRemTime, setOpRemTime] = useState<number>(60000);
   const [history, setHistory] = useState<string[]>([]);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState<string>("");
   const tickRef = useRef<boolean>(false);
   const turnRef = useRef<number>(BLACK_CELL);
   const [msg, setMsg] = useState<string>("Starting...");
   const historyBoxRef = useRef<HTMLDivElement>(null);
-  const chatBoxRef = useRef<HTMLDivElement>(null);
 
   let started = false;
 
@@ -104,7 +101,7 @@ const Spectate: React.FC = () => {
 
       case "gameover":
         tickRef.current = false;
-        setMsg(msg.winner === gsRef.current?.color ? "You won" : "You lost");
+        setMsg(msg.winner === WHITE_CELL ? "White won" : "Black won");
         destSocket();
         break;
     }
@@ -121,21 +118,20 @@ const Spectate: React.FC = () => {
     const wsurl = localStorage.getItem('wsurl') ?? '';
     const token = localStorage.getItem('token');
     const tokenType = localStorage.getItem('tokenType');
-    socketRef.current = new WebSocket(`${wsurl}/play`, `${tokenType}.${token}`);
+    socketRef.current = new WebSocket(`${wsurl}/spectate?gameid=${gameId}`, `${tokenType}.${token}`);
     socketRef.current.onmessage = async (event: MessageEvent) => {
       const data = await event.data;
       await handleSocketRecv(data);
     };
+    socketRef.current.onclose = async () => {
+      tickRef.current = false;
+    }
   };
 
   const afterStart = async (msg: MsgStart) => {
     await getGameState();
     if (gsRef.current) gsRef.current.color = msg.color;
     tickRef.current = true;
-    setMsg("Started")
-    const url = new URL(window.location.href);
-    url.searchParams.set("id", `${msg.gameid}`);
-    window.history.replaceState({}, "", url);
     tickClock();
   }
 
@@ -173,7 +169,7 @@ const Spectate: React.FC = () => {
     started = true;
 
     gsRef.current = {
-      gameId: "",
+      gameId: gameId,
       pname: "",
       opname: "",
       color: EMPTY_CELL,
@@ -196,37 +192,6 @@ const Spectate: React.FC = () => {
       historyBoxRef.current.scrollTop = historyBoxRef.current.scrollHeight
     }
   })
-
-  useEffect(() => {
-    if (chatBoxRef.current) {
-      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
-    }
-  }, [chatMessages]);
-
-  const sendChatMessage = () => {
-    const socket = socketRef.current;
-    const text = chatInput.trim();
-    if (!socket || !text) return;
-    socket.send(JSON.stringify({ type: "chat", text: text }));
-    messages.current = [
-      ...messages.current,
-      { type: "sent", text }
-    ];
-    setChatMessages([...messages.current]);
-    setChatInput("");
-  };
-
-  const sendPassMove = () => {
-    const socket = socketRef.current;
-    if (!socket) return;
-    socket.send(JSON.stringify({ type: "move", move: "ps" }));
-  };
-
-  const sendAbort = () => {
-    const socket = socketRef.current;
-    if (!socket) return;
-    socket.send(JSON.stringify({ type: "abort" }));
-  };
 
   useEffect(() => {
     startSetup();
@@ -306,30 +271,6 @@ const Spectate: React.FC = () => {
           >
             {msg}
           </Box>
-          <HStack w="320px" spacing={3}>
-            <Button
-              flex={1}
-              size="sm"
-              onClick={sendPassMove}
-              bg="green.600"
-              color="white"
-              rounded={"2px"}
-              _hover={{ bg: "green.500" }}
-            >
-              Pass
-            </Button>
-            <Button
-              flex={1}
-              size="sm"
-              onClick={sendAbort}
-              bg="red.600"
-              color="white"
-              rounded={"2px"}
-              _hover={{ bg: "red.500" }}
-            >
-              Abort
-            </Button>
-          </HStack>
           <Box
             w="320px"
             h="220px"
@@ -397,72 +338,6 @@ const Spectate: React.FC = () => {
                 </Text>
               )}
             </VStack>
-          </Box>
-          <Box
-            w="320px"
-            h="228px"
-            bg="gray.900"
-            borderRadius="2px"
-            border="1px solid"
-            borderColor="gray.800"
-            overflow="hidden"
-            display="flex"
-            flexDirection="column"
-            gap={3}
-            p={3}
-          >
-            <Text fontSize="md" fontWeight="600" color="white" mb={1}>
-              Chat
-            </Text>
-            <Box
-              ref={chatBoxRef}
-              flex="1"
-              overflowY="auto"
-              css={{
-                "&::-webkit-scrollbar": { width: "6px" },
-                "&::-webkit-scrollbar-thumb": { background: "#4b5563", borderRadius: "4px" },
-              }}
-            >
-              <VStack align="stretch" spacing={2}>
-                {chatMessages.map((m, idx) => (
-                  <Flex key={idx} justify={m.type === "sent" ? "flex-end" : "flex-start"}>
-                    <Box
-                      maxW="80%"
-                      px={3}
-                      py={2}
-                      borderRadius="md"
-                      color={m.type === "sent" ? "white" : "gray.400"}
-                      fontSize="sm"
-                      boxShadow="sm"
-                    >
-                      {m.text}
-                    </Box>
-                  </Flex>
-                ))}
-                {chatMessages.length === 0 && (
-                  <Text color="gray.500" fontSize="sm" textAlign="center">
-                    No messages yet
-                  </Text>
-                )}
-              </VStack>
-            </Box>
-            <HStack>
-              <Input
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Type a message..."
-                bg="gray.800"
-                borderColor="gray.700"
-                color="white"
-                _placeholder={{ color: "gray.500" }}
-              />
-              <Button
-                onClick={sendChatMessage}
-                colorScheme="blue"
-              >
-                Send
-              </Button>
-            </HStack>
           </Box>
         </VStack>
       </Flex>

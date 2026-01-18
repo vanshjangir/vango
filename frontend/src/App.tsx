@@ -16,7 +16,7 @@ function App() {
           <Route path = "/login" element = {<Login />} />
           <Route path = "/profile/:username" element = {<Profile />} />
           <Route path = "/review/:gameId" element = {<ReviewGame />} />
-          <Route path = "/spectate/:gameId" element = {<Spectate />} />
+          <Route path = "/spectate/:id" element = {<Spectate />} />
         </Routes>
       </BrowserRouter>
     </>

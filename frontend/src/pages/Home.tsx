@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { PlayButton } from "../components/Buttons";
+import { PlayButton, SpectatorButton } from "../components/Buttons";
 import { Flex, Box, Text, Image, VStack, HStack, Container } from "@chakra-ui/react";
 
 const Home = () => {
@@ -11,6 +11,10 @@ const Home = () => {
   const tokenType = localStorage.getItem("tokenType") || "";
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   let finding = false;
+
+  const spectateGame = async (gameId: string) => {
+    nav(`/spectate/${gameId}`);
+  }
 
   const findGame = async () => {
     if (finding) return;
@@ -81,9 +85,9 @@ const Home = () => {
                 label={"Play Online"}
                 handler={findGame}
               />
-              <PlayButton
+              <SpectatorButton
                 label={"Spectate"}
-                handler={findGame}
+                handler={spectateGame}
               />
             </VStack>
 
