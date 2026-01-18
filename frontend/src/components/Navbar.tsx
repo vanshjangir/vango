@@ -91,36 +91,21 @@ const Navbar: React.FC = () => {
                 </Button>
               </HStack>
             ) : (
-              <>
-                <Button
-                  as={Link}
-                  href="/login"
-                  bg="gray.800"
-                  color="gray.200"
-                  border="1px solid"
-                  borderColor="gray.700"
-                  rounded="2px"
-                  px={5}
-                  py={2}
-                  fontWeight="500"
-                  _hover={{ borderColor: "gray.600" }}
-                >
-                  Login
-                </Button>
-                <Button
-                  as={Link}
-                  href="/signup"
-                  bg="white"
-                  color="gray.900"
-                  rounded="2px"
-                  px={5}
-                  py={2}
-                  fontWeight="500"
-                  _hover={{ bg: "gray.100" }}
-                >
-                  Sign Up
-                </Button>
-              </>
+              <Button
+                as={Link}
+                href="/login"
+                bg="gray.800"
+                color="gray.200"
+                border="1px solid"
+                borderColor="gray.700"
+                rounded="2px"
+                px={5}
+                py={2}
+                fontWeight="500"
+                _hover={{ borderColor: "gray.600" }}
+              >
+                Login
+              </Button>
             )}
           </HStack>
 
@@ -181,38 +166,22 @@ const Navbar: React.FC = () => {
                 </Button>
               </>
             ) : (
-              <>
-                <Button
-                  as={Link}
-                  href="/login"
-                  bg="gray.800"
-                  color="gray.200"
-                  border="1px solid"
-                  borderColor="gray.700"
-                  _hover={{ borderColor: "gray.600", textDecoration: "none" }}
-                  rounded="2px"
-                  w="full"
-                  px={4}
-                  py={3}
-                  fontWeight="500"
-                >
-                  Login
-                </Button>
-                <Button
-                  as={Link}
-                  href="/signup"
-                  bg="white"
-                  color="gray.900"
-                  _hover={{ bg: "gray.100", textDecoration: "none" }}
-                  rounded="2px"
-                  w="full"
-                  px={4}
-                  py={3}
-                  fontWeight="500"
-                >
-                  Sign Up
-                </Button>
-              </>
+              <Button
+                as={Link}
+                href="/login"
+                bg="gray.800"
+                color="gray.200"
+                border="1px solid"
+                borderColor="gray.700"
+                _hover={{ borderColor: "gray.600", textDecoration: "none" }}
+                rounded="2px"
+                w="full"
+                px={4}
+                py={3}
+                fontWeight="500"
+              >
+                Login
+              </Button>
             )}
           </VStack>
         </Box>
