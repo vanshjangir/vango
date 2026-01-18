@@ -20,6 +20,8 @@ func main() {
 
 	if err := util_app.Load("./gameservers.json"); err != nil {
 		log.Println("Error loading game servers", err)
+		log.Println("Falling back")
+		util_app.Fallback()
 	}
 
 	db := postgres_adp.SetupDB()

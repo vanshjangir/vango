@@ -29,6 +29,13 @@ func Load(filename string) error {
 	return nil
 }
 
+func Fallback() {
+	gameServers = append(gameServers, GameServer{
+		Url: "wss://vangowebsocket.vanshjangir.in",
+		Load: 1,
+	})
+}
+
 func Pick() string {
 	gsMu.Lock()
 	defer gsMu.Unlock()
