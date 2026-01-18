@@ -20,7 +20,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build images
-        run: docker compose -f docker-compose.yaml build
+        run: docker compose -f docker-compose.yaml build --no-cache
 
       - name: Push images
         run: docker compose -f docker-compose.yaml push

@@ -1,12 +1,9 @@
-FROM golang:latest AS builder
+FROM golang:alpine AS builder
 WORKDIR /app
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/websocket ./cmd/websocket
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o /app/websocket ./cmd/websocket
 
-FROM debian:stable-slim AS prod
-
-RUN apt-get update && apt-get install -y gnugo
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+FROM scratch AS prod
 
 COPY --from=builder /app/websocket /websocket
 

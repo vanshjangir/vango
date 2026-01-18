@@ -26,6 +26,8 @@ func (s *userService) LoginByGoogle(credentials string) (string, error) {
 			err = s.ur.InsertUser(domain.User{
 				Username: username,
 				Email:    tokenInfo.Email,
+				Rating: 400,
+				Highestrating: 400,
 			})
 			if err != nil {
 				return "", err
