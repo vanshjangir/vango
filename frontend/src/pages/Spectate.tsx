@@ -34,6 +34,9 @@ const Spectate: React.FC = () => {
   const turnRef = useRef<number>(BLACK_CELL);
   const [msg, setMsg] = useState<string>("Starting...");
   const historyBoxRef = useRef<HTMLDivElement>(null);
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  const token = localStorage.getItem('token');
+  const tokenType = localStorage.getItem('tokenType');
 
   let started = false;
 
@@ -114,11 +117,26 @@ const Spectate: React.FC = () => {
     }
   }
 
+  const getWsUrl = async (): Promise<string> => {
+    const response = await fetch(BACKEND_URL + "/spectate", {
+      headers: {
+        "Authorization": `${tokenType} ${token}`,
+      },
+    })
+    if (response.ok) {
+      const json = await response.json();
+      return json.wsurl;
+    } else {
+      return "";
+    }
+  }
+
   const setupSocket = async () => {
-    const wsurl = localStorage.getItem('wsurl') ?? '';
-    const token = localStorage.getItem('token');
-    const tokenType = localStorage.getItem('tokenType');
-    socketRef.current = new WebSocket(`${wsurl}/spectate?gameid=${gameId}`, `${tokenType}.${token}`);
+    const wsurl = await getWsUrl();
+    socketRef.current = new WebSocket(
+      `${wsurl}/spectate?gameid=${gameId}`,
+      `${tokenType}.${token}`
+    );
     socketRef.current.onmessage = async (event: MessageEvent) => {
       const data = await event.data;
       await handleSocketRecv(data);

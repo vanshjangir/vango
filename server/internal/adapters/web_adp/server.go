@@ -31,8 +31,8 @@ func (gh *GinHandler) RegisterRoutes() {
 	gh.r.GET("/profile", gh.profile)
 	gh.r.GET("/review", gh.review)
 	gh.r.POST("/login", gh.login)
-	gh.r.POST("/spectate/:gameid", gh.spectate)
 
+	gh.r.GET("/spectate", gh.httpAuth, gh.spectate)
 	gh.r.GET("/findgame", gh.httpAuth, gh.findGame)
 	gh.r.POST("/changeusername", gh.httpAuth, gh.changeUsername)
 }

@@ -327,7 +327,7 @@ const Game: React.FC = () => {
             <Box fontSize="lg" fontWeight="600">{formatTime(opRemTime)}</Box>
             <Box fontSize="lg" fontWeight="600">{formatTime(pRemTime)}</Box>
             <Box fontSize="sm" opacity={0.7}>
-              {gsRef.current?.opname ? gsRef.current?.opname : "Loading..."}
+              {gsRef.current?.pname ? gsRef.current?.pname : "Loading..."}
               {gsRef.current?.color === turnRef.current ? "(Your turn)" : ""}
             </Box>
           </Box>

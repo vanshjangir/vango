@@ -98,7 +98,7 @@ func (wsh *WsHandler) spectateGame(gameId int, c *websocket.Conn) {
 		log.Println("spectateGame: SendSyncState:", err)
 		return
 	}
-	
+
 	err = wsh.ss.SendSyncState(blackGame, whiteGame, wsGameRepo)
 	if err != nil {
 		log.Println("spectateGame: SendSyncState:", err)

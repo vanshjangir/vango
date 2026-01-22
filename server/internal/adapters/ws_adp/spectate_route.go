@@ -10,7 +10,6 @@ import (
 )
 
 func (wsh *WsHandler) spectate(ctx *gin.Context) {
-	log.Println("gga a")
 	upgrader, err := getUpgrader(ctx)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Could not able to get upgrader"})
@@ -33,7 +32,7 @@ func (wsh *WsHandler) spectate(ctx *gin.Context) {
 		c.Close()
 		return
 	}
-	
+
 	game := wsh.ws.GetGameFromId(gameId)
 	if game == nil {
 		log.Println("Game not found", gameId)
@@ -59,7 +58,7 @@ func (wsh *WsHandler) spectate(ctx *gin.Context) {
 		log.Println("spectateGame: SendSyncState:", err)
 		return
 	}
-	
+
 	err = wsh.ss.SendSyncState(blackGame, whiteGame, wsGameRepo)
 	if err != nil {
 		log.Println("spectateGame: SendSyncState:", err)

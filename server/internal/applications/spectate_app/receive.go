@@ -42,7 +42,7 @@ func (s *spectateService) SendStartConfirmation(repo ports.WsGameRepository) err
 	if err != nil {
 		return fmt.Errorf("SendStartConfirmation: Marshal: %v", err)
 	}
-	
+
 	err = repo.Send(data)
 	if err != nil {
 		return fmt.Errorf("SendStartConfirmation: repo.Send: %v", err)
@@ -65,7 +65,7 @@ func (s *spectateService) SendSyncState(blackGame, whiteGame *domain.Game, repo 
 	if err != nil {
 		return fmt.Errorf("SendSyncState: Marshal: %v", err)
 	}
-	
+
 	err = repo.Send(data)
 	if err != nil {
 		return fmt.Errorf("SendSyncState: repo.Send: %v", err)

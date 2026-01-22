@@ -31,7 +31,7 @@ func Load(filename string) error {
 
 func Fallback() {
 	gameServers = append(gameServers, GameServer{
-		Url: "wss://vangowebsocket.vanshjangir.in",
+		Url:  "wss://vangowebsocket.vanshjangir.in",
 		Load: 1,
 	})
 }

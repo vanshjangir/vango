@@ -19,14 +19,14 @@ func (s *userService) LoginByGoogle(credentials string) (string, error) {
 	var user domain.User
 	user, err = s.ur.FindByEmail(tokenInfo.Email)
 	if err != nil {
-		log.Println("error",err, sql.ErrNoRows)
+		log.Println("error", err, sql.ErrNoRows)
 		if err.Error() == "record not found" {
 			uniqueId := int(uuid.New().ID())
 			username := "U" + strconv.Itoa(uniqueId)
 			err = s.ur.InsertUser(domain.User{
-				Username: username,
-				Email:    tokenInfo.Email,
-				Rating: 400,
+				Username:      username,
+				Email:         tokenInfo.Email,
+				Rating:        400,
 				Highestrating: 400,
 			})
 			if err != nil {
