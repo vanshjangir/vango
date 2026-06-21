@@ -46,7 +46,6 @@ const Navbar: React.FC = () => {
       top="0"
       zIndex="1000"
       bg="black"
-      borderColor="gray.800"
     >
       <Box maxW="6xl" mx="auto" px={{ base: 4, sm: 6, lg: 4 }}>
         <Flex justify="space-between" h={20} align="center">
@@ -81,7 +80,7 @@ const Navbar: React.FC = () => {
                   color="gray.200"
                   border="1px solid"
                   borderColor="gray.700"
-                  borderRadius="2px"
+                  borderRadius="0px"
                   px={4}
                   py={2}
                   fontWeight="500"
@@ -98,7 +97,7 @@ const Navbar: React.FC = () => {
                 color="gray.200"
                 border="1px solid"
                 borderColor="gray.700"
-                rounded="2px"
+                rounded="0px"
                 px={5}
                 py={2}
                 fontWeight="500"
@@ -120,7 +119,7 @@ const Navbar: React.FC = () => {
             border="1px solid"
             borderColor="gray.700"
             _hover={{ borderColor: "gray.600" }}
-            rounded="2px"
+            rounded="0px"
           />
         </Flex>
       </Box>
@@ -156,7 +155,7 @@ const Navbar: React.FC = () => {
                   border="1px solid"
                   borderColor="gray.700"
                   _hover={{ borderColor: "gray.600" }}
-                  rounded="2px"
+                  rounded="0px"
                   w="full"
                   px={4}
                   py={3}
@@ -174,7 +173,7 @@ const Navbar: React.FC = () => {
                 border="1px solid"
                 borderColor="gray.700"
                 _hover={{ borderColor: "gray.600", textDecoration: "none" }}
-                rounded="2px"
+                rounded="0px"
                 w="full"
                 px={4}
                 py={3}

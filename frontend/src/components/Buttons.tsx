@@ -12,17 +12,19 @@ export const PlayButton = (
       onClick={() => handler()}
       w="full"
       size="lg"
-      fontSize="3xl"
-      fontWeight="600"
-      h="200px"
+      fontSize="md"
+      fontWeight="500"
+      letterSpacing="wide"
+      textTransform="uppercase"
+      h="56px"
       bg="white"
-      color="gray.900"
-      rounded="2px"
-      borderColor="gray.300"
+      color="black"
+      rounded="0px"
+      border="none"
       _hover={{
-        bg: "gray.100",
-        borderColor: "gray.400"
+        bg: "gray.200",
       }}
+      transition="background 0.15s ease"
     >
       {label}
     </Button>
@@ -40,16 +42,23 @@ export const SpectatorButton = (
     <Box
       w="full"
       display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
+      flexDirection="row"
+      alignItems="stretch"
     >
       <Input
-        w="full"
-        rounded="2px 2px 0px 0px"
+        flex="1"
+        rounded="0px"
         border="1px solid"
-        textAlign="center"
-        placeholder="Game Id or Link"
+        borderColor="gray.800"
+        bg="transparent"
+        color="white"
+        h="56px"
+        fontSize="sm"
+        px={4}
+        placeholder="Game ID or link"
+        _placeholder={{ color: "gray.600" }}
+        _hover={{ borderColor: "gray.700" }}
+        _focus={{ borderColor: "gray.600", boxShadow: "none" }}
         onChange={(e) => {
           const value = e.target.value;
           let id = "";
@@ -62,18 +71,23 @@ export const SpectatorButton = (
       />
       <Button
         onClick={() => handler(gameId)}
-        w="full"
-        h="200px"
-        fontSize="3xl"
-        fontWeight="600"
-        rounded="0px 0px 2px 2px"
-        bg="white"
-        color="gray.900"
-        borderColor="gray.300"
+        h="56px"
+        px={6}
+        fontSize="md"
+        fontWeight="500"
+        letterSpacing="wide"
+        textTransform="uppercase"
+        rounded="0px"
+        bg="transparent"
+        color="gray.400"
+        border="1px solid"
+        borderColor="gray.800"
+        borderLeft="none"
         _hover={{
-          bg: "gray.100",
-          borderColor: "gray.400"
+          color: "white",
+          borderColor: "gray.700",
         }}
+        transition="all 0.15s ease"
       >
         {label}
       </Button>
@@ -97,7 +111,7 @@ export const ReconnectButton = (
       h="auto"
       bg="gray.800"
       color="white"
-      rounded="2px"
+      rounded="0px"
       border="1px solid"
       borderColor="gray.700"
       _hover={{

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { PlayButton, SpectatorButton } from "../components/Buttons";
-import { Flex, Box, Text, Image, VStack, HStack, Container } from "@chakra-ui/react";
+import { Flex, Box, Text, Image, VStack, HStack } from "@chakra-ui/react";
 
 const Home = () => {
   const nav = useNavigate();
@@ -44,57 +44,112 @@ const Home = () => {
       color="white"
     >
       <Navbar />
-      <Flex flex="1" align="center" justify="center" px={6} py={10}>
-        <Container maxW="6xl" mx="auto">
-          <Box>
-            <Text fontSize="4xl" fontWeight="600" letterSpacing="tight">
-              Play Go, simply.
-            </Text>
-            <Text mt={3} fontSize="md" color="gray.400">
-              Fast online games, no clutter. Just you, your opponent,
-              and the board.
-            </Text>
-            {matchStatus === "pending" ? (
-              <HStack spacing={3} align="center">
-                <HStack spacing={1}>
-                  <Box w="8px" h="8px" bg="gray.500" borderRadius="full" />
-                  <Box w="8px" h="8px" bg="gray.400" borderRadius="full" />
-                  <Box w="8px" h="8px" bg="gray.300" borderRadius="full" />
-                </HStack>
-                <Text fontSize="sm" color="gray.400">
-                  Finding an opponent...
+
+      <Flex flex="1" direction="column">
+        {/* Main content area */}
+        <Box maxW="6xl" mx="auto" w="full" px={{ base: 4, sm: 6, lg: 4 }} py={{ base: 8, md: 0 }} flex="1" display="flex" alignItems="center">
+          <Flex
+            w="full"
+            direction={{ base: "column", md: "row" }}
+            align={{ base: "stretch", md: "flex-end" }}
+            gap={0}
+          >
+            {/* Left column — text + buttons */}
+            <VStack
+              w={{ base: "100%", md: "50%" }}
+              align="stretch"
+              spacing={0}
+              pr={{ base: 0, md: 8 }}
+              justify="flex-end"
+            >
+              {/* Large headline block */}
+              <Box mb={6}>
+                <Text
+                  fontSize={{ base: "5xl", md: "7xl" }}
+                  fontWeight="700"
+                  letterSpacing="tighter"
+                  lineHeight="0.95"
+                >
+                  Play
+                </Text>
+                <Text
+                  fontSize={{ base: "5xl", md: "7xl" }}
+                  fontWeight="700"
+                  letterSpacing="tighter"
+                  lineHeight="0.95"
+                >
+                  Go,
+                </Text>
+                <Text
+                  fontSize={{ base: "5xl", md: "7xl" }}
+                  fontWeight="700"
+                  letterSpacing="tighter"
+                  lineHeight="0.95"
+                  color="gray.500"
+                >
+                  simply.
+                </Text>
+              </Box>
+
+              {/* Description */}
+              <Text fontSize="sm" color="gray.500" lineHeight="1.7" mb={5}>
+                Fast online games, no clutter. Just you,
+                <br />
+                your opponent, and the board.
+              </Text>
+
+              {/* Feature tags */}
+              <HStack spacing={4} mb={6}>
+                <Text fontSize="xs" color="gray.600" fontWeight="500" letterSpacing="widest" textTransform="uppercase">
+                  9×9
+                </Text>
+                <Text fontSize="xs" color="gray.700">—</Text>
+                <Text fontSize="xs" color="gray.600" fontWeight="500" letterSpacing="widest" textTransform="uppercase">
+                  13×13
+                </Text>
+                <Text fontSize="xs" color="gray.700">—</Text>
+                <Text fontSize="xs" color="gray.600" fontWeight="500" letterSpacing="widest" textTransform="uppercase">
+                  19×19
                 </Text>
               </HStack>
-            ) : (
-              <Text fontSize="sm" color="gray.500">
-                {token ? "You’re ready to play." : "Log in to save your games and rating."}
-              </Text>
-            )}
-          </Box>
 
-          <HStack
-            spacing={{ base: 10, md: 16 }}
-            marginTop={"24px"}
-            align="flex-start"
-            gap={4}
-            justify="space-between"
-            flexDir={{ base: "column", md: "row" }}
-          >
-            <VStack w={{ base: "100%", md: "50%" }} spacing={4}>
-              <PlayButton
-                label={"Play Online"}
-                handler={findGame}
-              />
-              <SpectatorButton
-                label={"Spectate"}
-                handler={spectateGame}
-              />
+              {/* Status */}
+              <Box mb={4}>
+                {matchStatus === "pending" ? (
+                  <HStack spacing={3} align="center">
+                    <HStack spacing={1}>
+                      <Box w="6px" h="6px" bg="gray.600" />
+                      <Box w="6px" h="6px" bg="gray.500" />
+                      <Box w="6px" h="6px" bg="gray.400" />
+                    </HStack>
+                    <Text fontSize="xs" color="gray.500" fontWeight="500" letterSpacing="wide" textTransform="uppercase">
+                      Finding opponent
+                    </Text>
+                  </HStack>
+                ) : (
+                  <Text fontSize="xs" color="gray.600" fontWeight="500" letterSpacing="wide" textTransform="uppercase">
+                    {token ? "Ready to play" : "Log in to save games & rating"}
+                  </Text>
+                )}
+              </Box>
+
+              {/* Action buttons */}
+              <VStack spacing={3} align="stretch">
+                <PlayButton
+                  label={"Play Online"}
+                  handler={findGame}
+                />
+                <SpectatorButton
+                  label={"Spectate"}
+                  handler={spectateGame}
+                />
+              </VStack>
             </VStack>
 
+            {/* Right column — board image */}
             <Box
               w={{ base: "100%", md: "50%" }}
-              h={{ base: "100%", md: "50%" }}
-              borderRadius="2px"
+              display={{ base: "none", md: "block" }}
               overflow="hidden"
             >
               <Image
@@ -103,10 +158,20 @@ const Home = () => {
                 objectFit="cover"
                 w="100%"
                 h="100%"
+                maxH="520px"
               />
             </Box>
-          </HStack>
-        </Container>
+          </Flex>
+        </Box>
+
+        {/* Footer line */}
+        <Box maxW="6xl" mx="auto" w="full" px={{ base: 4, sm: 6, lg: 4 }} pb={6}>
+          <Box borderTop="1px solid" borderColor="gray.900" pt={4}>
+            <Text fontSize="xs" color="gray.700" letterSpacing="wide">
+              VANGO — Open source Go
+            </Text>
+          </Box>
+        </Box>
       </Flex>
     </Flex>
   );
